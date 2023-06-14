@@ -18,8 +18,8 @@
 .void() throw;
 
 
+.float inv_item_heist_end;	//bool - if item thrown / dropped into final "bin" position
 .float inv_item_encumber;	//0, 1, 2 - encumbrance setting
-
 .entity inv_item_heist;	//specific entity player is carrying
 
 // Action timers

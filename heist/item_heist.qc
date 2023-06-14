@@ -52,17 +52,17 @@ void() item_heist_touch={
 
 	other.flags = other.flags | FL_HEIST_ITEM;
 	other.inv_item_heist = self;
+	other.inv_item_encumber = self.inv_item_encumber;
 
 	self.solid = SOLID_NOT;
 	self.movetype = MOVETYPE_FOLLOW;
 	self.owner = other;
 	self.aiment = other;
-
-
 };
 
 /*
 	Player has thrown the item.
+	set dir and velocity before this call!
 */
 void() item_heist_throw={
 
@@ -73,17 +73,25 @@ void() item_heist_throw={
 	self.solid = SOLID_CORPSE;
 	self.dphitcontentsmask = DPCONTENTS_SOLID | DPCONTENTS_BODY | DPCONTENTS_CORPSE | DPCONTENTS_NODROP;
 	self.owner = world;
-	
+
+	self.avelocity = vectoangles(self.velocity);
+
 	self.think = th_item_heist_thrown;
 	self.nextthink = time + 0.1;
 };
 
 void() item_heist_land={
 
-	self.movetype = MOVETYPE_NONE;
-	self.solid = SOLID_BSP;
 	droptofloor();
 
+	self.movetype = MOVETYPE_NONE;
+	if(self.inv_item_heist_end){
+		self.solid = SOLID_NOT;
+		self.touch = SUB_Null;
+	}
+	else{
+		self.solid = SOLID_BSP;
+	}
 };
 
 void() item_heist_throw_touch={
