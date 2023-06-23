@@ -22,6 +22,8 @@
 #define TIME_ACTION_DOOR_PICK 20
 #define TIME_ACTION_BUTTON_PRESS 5
 
+.string group;
+
 .float trig_radius;
 .void() throw;
 

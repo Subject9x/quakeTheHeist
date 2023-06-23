@@ -64,3 +64,7 @@ oldone.qc		// registered
 ghost.qc         	// added "Ancient ghosts of the fallen" death animation
 soul.qc			// added "Relieved souls of the enslaved" death animation
 lightbeam.qc		// light beam spawn addon (by Nahuel)
+
+heist/defs/heist_defs.qc
+heist/item_heist.qc
+heist/trigger_heist.qc

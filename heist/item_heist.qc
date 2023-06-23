@@ -32,7 +32,7 @@ void() item_heist={
 	setsize(self, self.mins, self.maxs);
 	setorigin(self, self.origin);
 
-	droptofloor();
+	droptofloor(self.angles_y, 64);
 };
 
 void() item_heist_touch={
@@ -82,7 +82,7 @@ void() item_heist_throw={
 
 void() item_heist_land={
 
-	droptofloor();
+	droptofloor(self.angles_y, 64);
 
 	self.movetype = MOVETYPE_NONE;
 	if(self.inv_item_heist_end){
@@ -112,11 +112,11 @@ void() th_item_heist_thrown={
 void() heist_item_sigil={
 
 	if(!self.inv_item_encumber){
-		self.inv_item_encumber IT_ENCUMBER_DISARM;
+		self.inv_item_encumber = IT_ENCUMBER_DISARM;
 	}
 
 	if((self.spawnflags & SPAWNFLAG_MDL_RAND)){
-		self.ent_mdl_idx = abs(rint(random()*3));
+		self.ent_mdl_idx = fabs(rint(random()*3));
 	}
 
 	self.model = "progs/end1.mdl";
@@ -136,11 +136,11 @@ void() heist_item_sigil={
 void() item_heist_ammo={
 
 	if(!self.inv_item_encumber){
-		self.inv_item_encumber IT_ENCUMBER_SHOOT;
+		self.inv_item_encumber = IT_ENCUMBER_SHOOT;
 	}
 
 	if((self.spawnflags & SPAWNFLAG_MDL_RAND)){
-		self.ent_mdl_idx = abs(rint(random()*3));
+		self.ent_mdl_idx = fabs(rint(random()*3));
 	}
 
 	self.model = "maps/b_shell1.bsp";
@@ -160,7 +160,7 @@ void() item_heist_ammo={
 void() item_heist_pack={
 
 	if(!self.inv_item_encumber){
-		self.inv_item_encumber IT_ENCUMBER_SHOOT;
+		self.inv_item_encumber = IT_ENCUMBER_SHOOT;
 	}
 
 	self.model = "progs/backpack_enforcer.mdl";
@@ -182,11 +182,11 @@ void() item_heist_pack={
 void() item_heist_gib={
 
 	if(!self.inv_item_encumber){
-		self.inv_item_encumber IT_ENCUMBER_SHOOT;
+		self.inv_item_encumber = IT_ENCUMBER_SHOOT;
 	}
 
 	if((self.spawnflags & SPAWNFLAG_MDL_RAND)){
-		self.ent_mdl_idx = abs(rint(random()*9));
+		self.ent_mdl_idx = fabs(rint(random()*9));
 	}
 
 	self.model = "progs/h_player1.mdl";
@@ -201,27 +201,27 @@ void() item_heist_gib={
 	}
 	if(self.ent_mdl_idx == 4){
 		self.model = "progs/h_wizard.mdl";
-		self.inv_item_encumber IT_ENCUMBER_SHOOT;
+		self.inv_item_encumber = IT_ENCUMBER_SHOOT;
 	}
 	if(self.ent_mdl_idx == 5){
 		self.model = "progs/h_hellkn.mdl";
-		self.inv_item_encumber IT_ENCUMBER_SHOOT;
+		self.inv_item_encumber = IT_ENCUMBER_SHOOT;
 	}
 	if(self.ent_mdl_idx == 6){
 		self.model = "progs/h_ogre.mdl";
-		self.inv_item_encumber IT_ENCUMBER_SHOOT;
+		self.inv_item_encumber = IT_ENCUMBER_SHOOT;
 	}
 	if(self.ent_mdl_idx == 7){
 		self.model = "progs/h_demon.mdl";
-		self.inv_item_encumber IT_ENCUMBER_DISARM;
+		self.inv_item_encumber = IT_ENCUMBER_DISARM;
 	}
 	if(self.ent_mdl_idx == 8){
 		self.model = "progs/h_shal.mdl";
-		self.inv_item_encumber IT_ENCUMBER_SHOOT;
+		self.inv_item_encumber = IT_ENCUMBER_SHOOT;
 	}
 	if(self.ent_mdl_idx == 9){
 		self.model = "progs/h_shams.mdl";
-		self.inv_item_encumber IT_ENCUMBER_DISARM;
+		self.inv_item_encumber = IT_ENCUMBER_DISARM;
 	}
 	
 	item_heist();

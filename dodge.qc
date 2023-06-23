@@ -117,13 +117,13 @@ void(entity missile) dodge_incoming =
     {
       if (panicjump(megadeth)) 
       { 
-        ai2_jump(megadeth, 250, [0 0 250]);
+        ai2_jump(megadeth, 250, [0, 0, 250]);
         return;
       }
       num = -1;				// at_ledge(megadeth, self.origin);
       if (num > CONTENT_SLIME) 
       {
-        ai2_jump(megadeth, 250, [0 0 250]);
+        ai2_jump(megadeth, 250, [0, 0, 250]);
         return;
       }
     }
@@ -272,13 +272,13 @@ void(entity threat, float dodge) dodge_fixed =
       num = -1;				// at_ledge(self.angles, self.origin);
       if (num == 0 && self.nojump == 0) 
       {
-        ai2_jump(self.angles, 200, [0 0 225]);
+        ai2_jump(self.angles, 200, [0, 0, 225]);
         return;
       }
     }
     else 
     { 
-      megadeth = self.angles - [0 180 0];
+      megadeth = self.angles - [0, 180, 0];
       NormalizeAngles(megadeth);
       if (walkmove(megadeth_y, g) == FALSE) 
       {
@@ -288,7 +288,7 @@ void(entity threat, float dodge) dodge_fixed =
         num = -1;			// at_ledge(megadeth, self.origin);
         if (num == 0 && self.nojump == 0) 
 	{
-          ai2_jump(megadeth, -250, [0 0 225]);
+          ai2_jump(megadeth, -250, [0, 0, 225]);
           return;
         }
       }
@@ -301,7 +301,7 @@ void(entity threat, float dodge) dodge_fixed =
     num = -1;				// at_ledge(self.angles, self.origin);
     if (num == 0 && self.nojump == 0) 
     {
-      ai2_jump(self.angles, 200, [0 0 225]);
+      ai2_jump(self.angles, 200, [0, 0, 225]);
       return;
     }
   }
@@ -394,7 +394,7 @@ float(vector vec) panicjump =
   if (trace_fraction == 1) 
   {
     start = trace_endpos;
-    end = start - [0 0 1500];
+    end = start - [0, 0, 1500];
     traceline(start, end, 1, self); 
     if (trace_fraction > 0.1) 
       	return FALSE;
@@ -406,4 +406,4 @@ float(vector vec) panicjump =
   }
   return TRUE;
 };
-
+

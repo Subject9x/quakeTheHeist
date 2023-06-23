@@ -24,7 +24,7 @@ void() trig_item_heist_touch={
     }
 
     if(itm.movetype != MOVETYPE_TOSS){
-        itm.velocity = normalize(itm.origin - (itm.origin + '0 0 10'), 25);
+        itm.velocity = normalize(itm.origin - (itm.origin + '0 0 10')* 25);
         itm.angles = vectoangles(self.velocity);
         itm.think = itm.throw;
         itm.nextthink = time + 0.01;    
@@ -76,7 +76,7 @@ void() trigger_heist_item_bin={
     self.touch = trig_item_heist_touch;
 };
 
-
+void() heist_endzone_trig;
 void() th_heist_endzone={
 
     entity players;
@@ -112,7 +112,7 @@ void() heist_endzone_use={
     if((self.spawnflags & SPAWNFLAG_START_OFF)){
         self.spawnflags = self.spawnflags - (self.spawnflags & SPAWNFLAG_START_OFF);
         self.think = th_heist_endzone;
-        self.nextthink = time + 1.0
+        self.nextthink = time + 1.0;
     }
 };
 
@@ -149,7 +149,7 @@ void() heist_endzone={
 /*
     Monster wave-point, use these to spawn waves of baddies as players are heistin'.
 */
-void() heist_mob_spawn_init;
+void() th_heist_mob_spawn_init;
 void() heist_mob_spawn_point={
 
     if(strlen(self.group) < 1){
@@ -202,7 +202,7 @@ void() heist_mob_wave_use={
     self.nextthink = time + 0.1;
     
 };
-void() th_heist_mob_wave_int;
+void() th_heist_mob_wave_init;
 void() heist_mob_wave_group={
 
     self.solid = SOLID_NOT;
@@ -215,12 +215,12 @@ void() heist_mob_wave_group={
     }
 
     self.use = heist_mob_wave_use;
-    self.think = th_heist_mob_wave_int;
+    self.think = th_heist_mob_wave_init;
     self.nextthink = time + 0.5;
 };
 
 //just a validation method for debug
-void() th_heist_mob_wave_int={
+void() th_heist_mob_wave_init={
 
     entity points;
     
@@ -234,5 +234,8 @@ void() th_heist_mob_wave_int={
 
 void() th_heist_mob_wave_trig={
 
+    if(true){
+        return;
+    }
 
 };
