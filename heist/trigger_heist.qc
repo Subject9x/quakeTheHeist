@@ -4,37 +4,65 @@
 
 void() trig_item_heist_touch={
 
-    local entity itm;
+    entity itm;
+    entity player;
+    entity this;
 
     if(!(other.flags & FL_HEIST_ITEM)){
         return;
     }
-
     activator = other;
 
     if((other.flags & FL_CLIENT)){
-        itm = other.inv_item_heist;
-        other.flags = other.flags - (other.flags  & FL_HEIST_ITEM);
-        other.inv_item_encumber = 0;
-        other.inv_item_heist = world;
+        player = other;
+        itm = player.inv_item_heist;
+        player.flags = player.flags - (player.flags  & FL_HEIST_ITEM);
+        player.inv_item_encumber = 0;
+        player.inv_item_heist = world;
+        itm.owner = world;
+        itm.inv_item_throw_owner = player;
+
+        //restore weapon
+        if(itm.inv_item_encumber == IT_ENCUMBER_DISARM){
+            this = self;
+            self = player;
+                self.weapon = self.weapon_last;
+                W_SetCurrentAmmo();
+            self = this;
+        }
     }
     else{
         //set item_heist to non-interact
         itm = other;
-    }
-
-    if(itm.movetype != MOVETYPE_TOSS){
-        itm.velocity = normalize(itm.origin - (itm.origin + '0 0 10')* 25);
-        itm.angles = vectoangles(self.velocity);
-        itm.think = itm.throw;
-        itm.nextthink = time + 0.01;    
-    }
-    itm.inv_item_heist_end = TRUE;
-
-    if((activator.flags & FL_CLIENT)){
-        centerprint (activator, "Item lifted.");
+        activator = itm.inv_item_throw_owner;
     }
     
+    itm.solid = SOLID_NOT;
+    if((self.spawnflags & SPAWNFLAG_REMOVE_HEIST_ITM)){
+        itm.movetype = MOVETYPE_NONE;
+        spawn_tfog(itm.origin);
+        itm.think = SUB_Remove;
+        itm.nextthink = time + 0.1;
+    }
+    else{
+        if(itm.movetype == MOVETYPE_TOSS){
+            itm.velocity = itm.velocity * 0.33;
+        }
+        else{
+            traceline(itm.origin, itm.origin + '0 0 -256 ', TRUE, itm);  
+            itm.movetype = MOVETYPE_NONE;
+            setorigin(itm, trace_endpos);
+            itm.think = SUB_Null;
+            itm.nextthink = time + 0.001;
+        }
+        itm.inv_item_heist_end = TRUE;
+    }
+
+
+    if((activator.flags & FL_CLIENT)){
+        centerprint (activator, "Item lifted.\n");
+    }
+
     self.count = self.count - 1;
 
     if(self.count != 0){
@@ -61,7 +89,7 @@ void() trig_item_heist_use={
 */
 void() trigger_heist_item_bin={
 
-    self.movetype = MOVETYPE_NONE;
+    InitTrigger();
 
     if(!self.count){
         self.count = 1;
@@ -71,8 +99,6 @@ void() trigger_heist_item_bin={
         self.solid = SOLID_NOT;
         return;
     }
-
-    self.solid = SOLID_TRIGGER;
     self.touch = trig_item_heist_touch;
 };
 
@@ -83,7 +109,7 @@ void() th_heist_endzone={
     float dist;
     float trig;
     
-    players = findchain(classname, "player");
+    players = find(world, classname, "player");
     while(players){
         dist = vlen(players.origin - self.origin);
 
@@ -152,8 +178,8 @@ void() heist_endzone={
 void() th_heist_mob_spawn_init;
 void() heist_mob_spawn_point={
 
-    if(strlen(self.group) < 1){
-        objerror(sprintf("[heist_mob_spawn_point] missing .group field. at %s", vtos(self.origin)));
+    if(!self.group){
+        objerror("[heist_mob_spawn_point] missing .group field.\n");
         remove(self);
         return;
     }
@@ -173,7 +199,7 @@ void() th_heist_mob_spawn_init={
 
     parent = false;
 
-    points = findchain(group, self.group);
+    points = find(world, group, self.group);
     while(points){
         if(points.classname == "heist_mob_wave_group"){
             parent = true;
@@ -181,7 +207,7 @@ void() th_heist_mob_spawn_init={
         points = points.chain;
     }
     if(!parent){
-        objerror(sprintf("[heist_mob_spawn_point] has no parent wave entity at %s", vtos(self.origin)));
+        objerror("[heist_mob_spawn_point] has no parent wave entity.\n");
         remove(self);
         return;
     }
@@ -208,8 +234,8 @@ void() heist_mob_wave_group={
     self.solid = SOLID_NOT;
     self.movetype = MOVETYPE_NONE;
 
-    if(strlen(self.group) < 1){
-        objerror(sprintf("[heist_mob_wave_group] missing .group field. at %s", vtos(self.origin)));
+    if(!self.group){
+        objerror("[heist_mob_wave_group] missing .group field.\n");
         remove(self);
         return;
     }
@@ -224,9 +250,9 @@ void() th_heist_mob_wave_init={
 
     entity points;
     
-    points = findchain(group, self.group);
+    points = find(world, group, self.group);
     if(!points){
-        objerror(sprintf("[heist_mob_wave_group] has no children spawn points at %s", vtos(self.origin)));
+        objerror("[heist_mob_wave_group] has no children spawn points.\n");
         remove(self);
         return;
     }

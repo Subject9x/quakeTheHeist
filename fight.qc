@@ -1,3 +1,21 @@
+/*  Copyright (C) 1996-1997  Id Software, Inc.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+    See file, 'COPYING', for details.
+*/
 
 /*
 
@@ -19,30 +37,29 @@ void() sham_smash1;
 void() sham_swingr1;
 void() sham_swingl1;
 
-float()	DemonCheckAttack;
-void(float side)	Demon_Melee;
-void(vector org, vector vel) SpawnMeatSpray;
+float() DemonCheckAttack;
+void(float side) Demon_Melee;
 
 void(vector dest) ChooseTurn;
 
 void() ai_face;
 
 
-float	enemy_vis, enemy_infront, enemy_range;
-float	enemy_yaw;
+float enemy_vis, enemy_infront, enemy_range;
+float enemy_yaw;
 
 
 void() knight_attack =
 {
-	local float		len;
-	
+	float len;
+
 // decide if now is a good swing time
 	len = vlen(self.enemy.origin+self.enemy.view_ofs - (self.origin+self.view_ofs));
-	
+
 	if (len<80)
-		knight_atk1 ();
+		knight_atk1();
 	else
-		knight_runatk1 ();
+		knight_runatk1();
 };
 
 //=============================================================================
@@ -57,53 +74,46 @@ Returns FALSE if movement should continue
 */
 float() CheckAttack =
 {
-	local vector	spot1, spot2;	
-	local entity	targ;
-	local float		chance;
+	vector spot1, spot2;
+	entity targ;
+	float chance;
 
 	targ = self.enemy;
-	
+
 // see if any entities are in the way of the shot
 	spot1 = self.origin + self.view_ofs;
 	spot2 = targ.origin + targ.view_ofs;
 
-	traceline (spot1, spot2, FALSE, self);
+	traceline(spot1, spot2, FALSE, self);
 
 	if (trace_ent != targ)
-		return FALSE;		// don't have a clear shot
-			
+		return FALSE; // don't have a clear shot
+
 	if (trace_inopen && trace_inwater)
-		return FALSE;			// sight line crossed contents
+		return FALSE; // sight line crossed contents
 
 	if (enemy_range == RANGE_MELEE)
-	{	// melee attack
+	{ // melee attack
 		if (self.th_melee)
 		{
 			if (self.classname == "monster_knight")
-				knight_attack ();
+				knight_attack();
 			else
-			{
-				self.th_melee ();
-				if (self.classname == "monster_reiver")
-					self.meleeing = 1;
-			}	
+				self.th_melee();
 			return TRUE;
 		}
 	}
-	
+
 // missile attack
 	if (!self.th_missile)
 		return FALSE;
 
-	if (self.classname == "monster_reiver")
-		self.meleeing = 0;
-	
 	if (time < self.attack_finished)
 		return FALSE;
-		
+
 	if (enemy_range == RANGE_FAR)
 		return FALSE;
-		
+
 	if (enemy_range == RANGE_MELEE)
 	{
 		chance = 0.9;
@@ -126,24 +136,10 @@ float() CheckAttack =
 	else
 		chance = 0;
 
-	if (random () < chance)
+	if (random() < chance)
 	{
-		self.th_missile ();
-		
-		if (autocvar_skill_adjusted_monster_rangedattack_frequence)
-		{
-			if (skill == 0)
-				SUB_AttackFinished (2*random());
-			else if (skill == 1)
-				SUB_AttackFinished (1.6*random());
-			else if (skill == 2)
-				SUB_AttackFinished (1.3*random());
-			else
-				SUB_AttackFinished (1*random());	// will be overriden by  SUB_CheckRefire  or not be used in skill 3 by  SUB_AttackFinished  anyhow !!
-		}
-		else
-			SUB_AttackFinished (2*random());
-		 
+		self.th_missile();
+		SUB_AttackFinished(2*random());
 		return TRUE;
 	}
 
@@ -161,7 +157,7 @@ Stay facing the enemy
 void() ai_face =
 {
 	self.ideal_yaw = vectoyaw(self.enemy.origin - self.origin);
-	ChangeYaw ();
+	ChangeYaw();
 };
 
 /*
@@ -171,30 +167,30 @@ ai_charge
 The monster is in a melee attack, so get as close as possible to .enemy
 =============
 */
-float (entity targ) visible;
+float(entity targ) visible;
 float(entity targ) infront;
 float(entity targ) range;
 
 void(float d) ai_charge =
 {
-	ai_face ();	
-	movetogoal (d);		// done in C code...
+	ai_face();
+	movetogoal(d); // done in C code...
 };
 
 void() ai_charge_side =
 {
-	local	vector	dtemp;
-	local	float	heading;
-	
+	vector dtemp;
+	float heading;
+
 // aim to the left of the enemy for a flyby
 
 	self.ideal_yaw = vectoyaw(self.enemy.origin - self.origin);
-	ChangeYaw ();
+	ChangeYaw();
 
-	makevectors (self.angles);
+	makevectors(self.angles);
 	dtemp = self.enemy.origin - 30*v_right;
 	heading = vectoyaw(dtemp - self.origin);
-	
+
 	walkmove(heading, 20);
 };
 
@@ -207,157 +203,40 @@ ai_melee
 */
 void() ai_melee =
 {
-	local vector	delta;
-	local float 	ldmg;
+	vector delta;
+	float ldmg;
 
 	if (!self.enemy)
-		return;		// removed before stroke
-		
+		return; // removed before stroke
+
 	delta = self.enemy.origin - self.origin;
 
 	if (vlen(delta) > 60)
 		return;
-		
+
 	ldmg = (random() + random() + random()) * 3;
-	T_Damage (self.enemy, self, self, ldmg);
-};
-
-
-void(float scratch_noise) ai_melee_carnivean =
-{
-	local vector	delta;
-	local float 	ldmg;
-
-	if (!self.enemy)
-		return;		// removed before stroke
-
-	delta = self.enemy.origin - self.origin;
-
-	if (vlen(delta) > 100)
-		return;
-		
-	ldmg = (random() + random() + random()) * autocvar_carnivean_scythe_damage;	// default 4
-	T_Damage (self.enemy, self, self, ldmg);
-	
-	makevectors (self.angles);
-	particle (self.origin + v_forward*50 + v_up*2, '0 0 0', 73, 17);		// spawn a little blood
-
-	if (scratch_noise)
-	{
-		sound (self, CHAN_AUTO, "demon/dhit2.wav", 0.5, ATTN_NORM);
-		local float richtung;
-		richtung = crandom () * 100;
-		SpawnMeatSpray (self.origin + v_forward * 30 + v_up*-5, v_right * richtung);	// spawn a little gore
-	}
-};
-
-
-void() ai_melee_torment =
-{
-	local vector	delta;
-	local float 	ldmg;
-
-	if (!self.enemy)
-		return;		// removed before stroke
-		
-	delta = self.enemy.origin - self.origin;
-
-	if (vlen(delta) > 77)
-		return;
-		
-	ldmg = (random() + random() + random()) * autocvar_torment_rod_melee;	// default 4
-	T_Damage (self.enemy, self, self, ldmg);
-};
-
-
-void() ai_melee_hknight =
-{
-	local vector	delta;
-	local float 	ldmg;
-
-	if (!self.enemy)
-		return;		// removed before stroke
-		
-	delta = self.enemy.origin - self.origin;
-
-	if (vlen(delta) > 60)
-		return;
-
-    var float autocvar_hknight_size_influenced_attack = 0; 	 	// set cvar 'hknight_size_influenced_attack' default to 0
-	if (autocvar_hknight_size_influenced_attack == 1)		// if 'hknight_size_influenced_attack' is set via autoexec.cfg to '1' raise monster´s attack values according to its size 
-		ldmg = (random() + random() + random()) * autocvar_hellknight_sword * self.scale;	// default 3
-	else
-		ldmg = (random() + random() + random()) * autocvar_hellknight_sword;			// default 3
-	T_Damage (self.enemy, self, self, ldmg);
-};
-
-
-void() ai_melee_knight =
-{
-	local vector	delta;
-	local float 	ldmg;
-
-	if (!self.enemy)
-		return;		// removed before stroke
-		
-	delta = self.enemy.origin - self.origin;
-
-	if (vlen(delta) > 60)
-		return;
-
-    var float autocvar_knight_size_influenced_attack = 0; 	 	// set cvar 'knight_size_influenced_attack' default to 0
-	if (autocvar_knight_size_influenced_attack == 1)		// if 'knight_size_influenced_attack' is set via autoexec.cfg to '1' raise monster´s attack values according to its size 
-		ldmg = (random() + random() + random()) * autocvar_knight_sword * self.scale;	// default 3
-	else
-		ldmg = (random() + random() + random()) * autocvar_knight_sword;		// default 3
-	T_Damage (self.enemy, self, self, ldmg);
+	T_Damage(self.enemy, self, self, ldmg);
 };
 
 
 void() ai_melee_side =
 {
-	local vector	delta;
-	local float 	ldmg;
+	vector delta;
+	float ldmg;
 
 	if (!self.enemy)
-		return;		// removed before stroke
-		
+		return; // removed before stroke
+
 	ai_charge_side();
-	
+
 	delta = self.enemy.origin - self.origin;
 
 	if (vlen(delta) > 60)
 		return;
-	if (!CanDamage (self.enemy, self))
+	if (!CanDamage(self.enemy, self))
 		return;
 	ldmg = (random() + random() + random()) * 3;
-	T_Damage (self.enemy, self, self, ldmg);
-};
-
-
-void() ai_melee_side_knight =
-{
-	local vector	delta;
-	local float 	ldmg;
-
-	if (!self.enemy)
-		return;		// removed before stroke
-		
-	ai_charge_side();
-	
-	delta = self.enemy.origin - self.origin;
-
-	if (vlen(delta) > 60)
-		return;
-	if (!CanDamage (self.enemy, self))
-		return;
-
-    var float autocvar_knight_size_influenced_attack = 0; 	 	// set cvar 'knight_size_influenced_attack' default to 0
-	if (autocvar_knight_size_influenced_attack == 1)		// if 'knight_size_influenced_attack' is set via autoexec.cfg to '1' raise monster´s attack values according to its size 
-		ldmg = (random() + random() + random()) * autocvar_knight_sword * self.scale;	// default 3
-	else
-		ldmg = (random() + random() + random()) * autocvar_knight_sword;		// default 3
-	T_Damage (self.enemy, self, self, ldmg);
+	T_Damage(self.enemy, self, self, ldmg);
 };
 
 
@@ -373,32 +252,32 @@ Returns FALSE if movement should continue
 */
 float() SoldierCheckAttack =
 {
-	local vector	spot1, spot2;	
-	local entity	targ;
-	local float		chance;
+	vector spot1, spot2;
+	entity targ;
+	float chance;
 
 	targ = self.enemy;
-	
+
 // see if any entities are in the way of the shot
 	spot1 = self.origin + self.view_ofs;
 	spot2 = targ.origin + targ.view_ofs;
 
-	traceline (spot1, spot2, FALSE, self);
+	traceline(spot1, spot2, FALSE, self);
 
 	if (trace_inopen && trace_inwater)
-		return FALSE;			// sight line crossed contents
+		return FALSE; // sight line crossed contents
 
 	if (trace_ent != targ)
-		return FALSE;	// don't have a clear shot
-			
-	
+		return FALSE; // don't have a clear shot
+
+
 // missile attack
 	if (time < self.attack_finished)
 		return FALSE;
-		
+
 	if (enemy_range == RANGE_FAR)
 		return FALSE;
-		
+
 	if (enemy_range == RANGE_MELEE)
 		chance = 0.9;
 	else if (enemy_range == RANGE_NEAR)
@@ -408,23 +287,10 @@ float() SoldierCheckAttack =
 	else
 		chance = 0;
 
-	if (random () < chance)
+	if (random() < chance)
 	{
-		self.th_missile ();
-		if (autocvar_skill_adjusted_monster_rangedattack_frequence)
-		{
-			if (skill == 0)
-				SUB_AttackFinished (1 + random());
-			else if (skill == 1)
-				SUB_AttackFinished (0.75 + random());
-			else if (skill == 2)
-				SUB_AttackFinished (0.5 + random());
-			else
-				SUB_AttackFinished (1 + random());	// will be overriden by  SUB_CheckRefire  anyhow !!
-		}
-		else
-			SUB_AttackFinished (1 + random());
-			
+		self.th_missile();
+		SUB_AttackFinished(1 + random());
 		if (random() < 0.3)
 			self.lefty = !self.lefty;
 
@@ -445,12 +311,12 @@ Returns FALSE if movement should continue
 */
 float() ShamCheckAttack =
 {
-	local vector	spot1, spot2;	
-	local entity	targ;
+	vector spot1, spot2;
+	entity targ;
 
 	if (enemy_range == RANGE_MELEE)
 	{
-		if (CanDamage (self.enemy, self))
+		if (CanDamage(self.enemy, self))
 		{
 			self.attack_state = AS_MELEE;
 			return TRUE;
@@ -459,12 +325,12 @@ float() ShamCheckAttack =
 
 	if (time < self.attack_finished)
 		return FALSE;
-	
+
 	if (!enemy_vis)
 		return FALSE;
-		
+
 	targ = self.enemy;
-	
+
 // see if any entities are in the way of the shot
 	spot1 = self.origin + self.view_ofs;
 	spot2 = targ.origin + targ.view_ofs;
@@ -472,36 +338,22 @@ float() ShamCheckAttack =
 	if (vlen(spot1 - spot2) > 600)
 		return FALSE;
 
-	traceline (spot1, spot2, FALSE, self);
+	traceline(spot1, spot2, FALSE, self);
 
 	if (trace_inopen && trace_inwater)
-		return FALSE;			// sight line crossed contents
+		return FALSE; // sight line crossed contents
 
 	if (trace_ent != targ)
 	{
-		return FALSE;	// don't have a clear shot
+		return FALSE; // don't have a clear shot
 	}
-			
+
 // missile attack
 	if (enemy_range == RANGE_FAR)
 		return FALSE;
-		
-	self.attack_state = AS_MISSILE;
-	
-	if (autocvar_skill_adjusted_monster_rangedattack_frequence)
-	{
-		if (skill == 0)
-			SUB_AttackFinished (2 + 2*random());
-		else if (skill == 1)
-			SUB_AttackFinished (1.4 + 2*random());
-		else if (skill == 2)
-			SUB_AttackFinished (0.8 + 2*random());
-		else
-			SUB_AttackFinished (2 + 2*random());	// will not be used in skill 3 by  SUB_AttackFinished  anyhow !!
-	}
-	else
-		SUB_AttackFinished (2 + 2*random());
 
+	self.attack_state = AS_MISSILE;
+	SUB_AttackFinished(2 + 2*random());
 	return TRUE;
 };
 
@@ -517,13 +369,13 @@ Returns FALSE if movement should continue
 */
 float() OgreCheckAttack =
 {
-	local vector	spot1, spot2;	
-	local entity	targ;
-	local float		chance;
+	vector spot1, spot2;
+	entity targ;
+	float chance;
 
 	if (enemy_range == RANGE_MELEE)
 	{
-		if (CanDamage (self.enemy, self))
+		if (CanDamage(self.enemy, self))
 		{
 			self.attack_state = AS_MELEE;
 			return TRUE;
@@ -532,33 +384,33 @@ float() OgreCheckAttack =
 
 	if (time < self.attack_finished)
 		return FALSE;
-	
+
 	if (!enemy_vis)
 		return FALSE;
-		
+
 	targ = self.enemy;
-	
+
 // see if any entities are in the way of the shot
 	spot1 = self.origin + self.view_ofs;
 	spot2 = targ.origin + targ.view_ofs;
 
-	traceline (spot1, spot2, FALSE, self);
+	traceline(spot1, spot2, FALSE, self);
 
 	if (trace_inopen && trace_inwater)
-		return FALSE;			// sight line crossed contents
+		return FALSE; // sight line crossed contents
 
 	if (trace_ent != targ)
 	{
-		return FALSE;	// don't have a clear shot
+		return FALSE; // don't have a clear shot
 	}
-			
+
 // missile attack
 	if (time < self.attack_finished)
 		return FALSE;
-		
+
 	if (enemy_range == RANGE_FAR)
 		return FALSE;
-		
+
 	else if (enemy_range == RANGE_NEAR)
 		chance = 0.10;
 	else if (enemy_range == RANGE_MID)
@@ -567,21 +419,7 @@ float() OgreCheckAttack =
 		chance = 0;
 
 	self.attack_state = AS_MISSILE;
-	
-	if (autocvar_skill_adjusted_monster_rangedattack_frequence)
-	{
-		if (skill == 0)
-			SUB_AttackFinished (1 + 2*random());
-		else if (skill == 1)
-			SUB_AttackFinished (0.75 + 2*random());
-		else if (skill == 2)
-			SUB_AttackFinished (0.5 + 2*random());
-		else
-			SUB_AttackFinished (1 + 2*random());	// will not be used in skill 3 by  SUB_AttackFinished  anyhow !!
-	}
-	else
-		SUB_AttackFinished (1 + 2*random());
-			
+	SUB_AttackFinished(1 + 2*random());
 	return TRUE;
 };
 

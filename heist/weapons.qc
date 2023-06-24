@@ -1251,6 +1251,12 @@ void() ImpulseCommands =
 	if (self.impulse == 12)
 		CycleWeaponBack();
 
+	if (self.impulse == CL_IMPULSE_ITEM_THROW){
+		if(self.inv_item_heist){
+			self.inv_item_heist.think = self.inv_item_heist.throw;
+			self.inv_item_heist.nextthink = time + 0.01;
+		}
+	}
 	if (self.impulse == 255)
 		QuadCheat();
 
@@ -1272,10 +1278,12 @@ void() W_WeaponFrame =
 	ImpulseCommands();
 
 // check for attack
-	if (self.button0)
-	{
-		SuperDamageSound();
-		W_Attack();
+	if(self.inv_item_encumber != IT_ENCUMBER_DISARM){
+		if (self.button0)
+		{
+			SuperDamageSound();
+			W_Attack();
+		}
 	}
 };
 

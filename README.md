@@ -16,3 +16,7 @@ just a 'small mod' kind of project for QuakeC, the idea is to incorporate heist 
 
 that's about it, the mantra is 'lightweight' so that modders can easily bring the fun into their own projects.
 
+
+### messy notes
++ initial commit was using Small-mod-compilation...but I wanted to expand my potential release targets, so I switched to Shpuld's Cleaned up V1.01.
+
