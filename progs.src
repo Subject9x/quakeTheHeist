@@ -19,7 +19,7 @@ world.qc
 heist/client.qc
 
 player.qc
-monsters.qc
+heist/monsters.qc
 doors.qc
 buttons.qc
 triggers.qc
@@ -31,19 +31,19 @@ heist/item_heist.qc
 heist/trigger_heist.qc
 //===========================
 
-ogre.qc
-demon.qc
-shambler.qc
-knight.qc
-soldier.qc
-wizard.qc
-dog.qc
-zombie.qc
-boss.qc
+heist/monst/ogre.qc
+heist/monst/demon.qc
+heist/monst/shambler.qc
+heist/monst/knight.qc
+heist/monst/soldier.qc
+heist/monst/wizard.qc
+heist/monst/dog.qc
+heist/monst/zombie.qc
+heist/monst/boss.qc
 
-tarbaby.qc		// registered
-hknight.qc		// registered
-fish.qc			// registered
-shalrath.qc		// registered
-enforcer.qc		// registered
-oldone.qc		// registered
+heist/monst/tarbaby.qc		// registered
+heist/monst/hknight.qc		// registered
+heist/monst/fish.qc			// registered
+heist/monst/shalrath.qc		// registered
+heist/monst/enforcer.qc		// registered
+heist/monst/oldone.qc		// registered
