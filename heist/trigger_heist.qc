@@ -4,9 +4,9 @@
 
 void() trig_item_heist_touch={
 
-    entity itm;
-    entity player;
-    entity this;
+    local entity itm;
+    local entity player;
+    local entity this;
 
     if(!(other.flags & FL_HEIST_ITEM)){
         return;
@@ -105,9 +105,9 @@ void() trigger_heist_item_bin={
 void() heist_endzone_trig;
 void() th_heist_endzone={
 
-    entity players;
-    float dist;
-    float trig;
+    local entity players;
+    local float dist;
+    local float trig;
     
     players = find(world, classname, "player");
     while(players){
@@ -172,6 +172,147 @@ void() heist_endzone={
     self.nextthink = time + 1.0;
 };
 
+void() trigger_heist_item_pile_touch={
+
+    local entity newItem;
+    local entity targItem;
+    local entity this;
+    local vector v;
+
+    if(!(other.flags & FL_CLIENT)){
+        return;
+    }
+
+    if(other.inv_item_heist){
+        return;
+    }
+
+    if(other == self.inv_item_throw_owner){
+        if(time < self.timer_action_start){
+            return;
+        }
+    }
+
+    targItem = self.inv_item_heist;
+
+    self.inv_item_throw_owner = other;
+    self.timer_action_start = time + 5;
+
+    this = self;
+    newItem = spawn();
+
+    self = newItem;
+        self.spawnflags = fabs(targItem.spawnflags);
+        if(targItem.classname == "item_heist_gib"){
+            self.classname = "item_heist_gib";
+            item_heist_gib_spawn(targItem.ent_mdl_idx);
+        }
+        if(targItem.classname == "item_heist_pack"){
+            self.classname = "item_heist_pack";
+            self.ent_mdl_idx = targItem.ent_mdl_idx;
+            item_heist_pack_spawn();
+        }
+        if(targItem.classname == "item_heist_ammo"){
+            self.classname = "item_heist_ammo";
+            self.ent_mdl_idx = targItem.ent_mdl_idx;
+            item_heist_ammo_spawn();
+        }
+        if(targItem.classname == "item_heist_sigil"){
+            self.classname = "item_heist_sigil";
+            self.ent_mdl_idx = targItem.ent_mdl_idx;
+            item_heist_sigil_spawn();
+        }
+		self.solid = SOLID_BSP;
+		self.movetype = MOVETYPE_NONE;
+
+        setmodel(self, self.model);
+        setsize(self, self.mins, self.maxs);
+        setorigin(self, other.origin);
+
+        self.cacheMins = self.mins;
+        self.cacheMaxs = self.maxs;
+
+        self.solid = SOLID_NOT;
+        self.takedamage = DAMAGE_NO;
+
+        self.origin_z = self.origin_z - 24;
+        self.flags = self.flags - (self.flags & FL_ONGROUND);
+        self.tempDir = normalize(other.origin - other.origin + '0 -8 0');
+        self.think = self.throw;
+        self.nextthink = time + 0.001;
+    self = this;
+
+    self.count = self.count - 1;
+    
+    if(self.count == 0){
+        multi_trigger();
+        self.solid = SOLID_NOT;
+
+        if((self.spawnflags & SPAWNFLAG_KILL_ON_DONE)){
+
+            WriteByte(MSG_BROADCAST, SVC_TEMPENTITY);
+            WriteByte(MSG_BROADCAST, TE_EXPLOSION);
+            WriteCoord(MSG_BROADCAST, self.cacheOrg_x);
+            WriteCoord(MSG_BROADCAST, self.cacheOrg_y);
+            WriteCoord(MSG_BROADCAST, self.cacheOrg_z);
+            BecomeExplosion();
+            return;
+        }
+
+        if((self.spawnflags & SPAWNFLAG_REMOVE_DONE)){
+            remove(self);
+            return;
+        }
+
+        self.spawnflags = self.spawnflags | SPAWNFLAG_START_OFF;
+    }
+};
+
+void() trigger_heist_item_pile_use={
+    if(!(self.spawnflags & SPAWNFLAG_START_OFF)){
+        return;
+    }
+    self.spawnflags = self.spawnflags - (self.spawnflags & SPAWNFLAG_START_OFF);
+    self.solid = SOLID_TRIGGER;
+    self.touch = trigger_heist_item_pile_touch;
+};
+
+void() trigger_heist_item_pile={
+
+    local entity targItem;
+
+    if(!self.group || self.group == ""){
+        objerror(" missing group key!\n");
+        return;
+    }
+
+    targItem = find(world, targetname, self.group);
+
+    self.inv_item_heist = targItem;
+
+    if(!self.inv_item_heist){
+        objerror("couldn't find target heist_item for key.\n");
+        return;
+    }
+
+    InitTrigger();
+
+    if(!self.count){
+        self.count = 1;
+    }
+
+    if((self.spawnflags & SPAWNFLAG_START_OFF)){
+        self.solid = SOLID_NOT;
+        return;
+    }
+    self.touch = trigger_heist_item_pile_touch;
+
+    if((self.spawnflags & SPAWNFLAG_KILL_ON_DONE)){
+        self.cacheOrg = self.absmin - self.absmax + world.origin;
+    }
+
+};
+
 /*
     Monster wave-point, use these to spawn waves of baddies as players are heistin'.
 */
@@ -194,15 +335,15 @@ void() heist_mob_spawn_point={
 };
 void() th_heist_mob_spawn_init={
 
-    entity points;
-    float parent;
+    local entity points;
+    local float parent;
 
-    parent = false;
+    parent = FALSE;
 
     points = find(world, group, self.group);
     while(points){
         if(points.classname == "heist_mob_wave_group"){
-            parent = true;
+            parent = TRUE;
         }
         points = points.chain;
     }
@@ -248,7 +389,7 @@ void() heist_mob_wave_group={
 //just a validation method for debug
 void() th_heist_mob_wave_init={
 
-    entity points;
+    local entity points;
     
     points = find(world, group, self.group);
     if(!points){
@@ -260,7 +401,7 @@ void() th_heist_mob_wave_init={
 
 void() th_heist_mob_wave_trig={
 
-    if(true){
+    if(TRUE){
         return;
     }
 

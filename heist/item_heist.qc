@@ -7,7 +7,6 @@ void() item_heist_throw;
 void() item_heist_land;
 
 void() th_item_heist_thrown;
-void() th_item_heist_place;
 
 /*
 	generic item for 'heist' gameplay.
@@ -20,46 +19,60 @@ void() item_heist={
 		return;
 	}
 
-	precache_model(self.model);
 
 	self.flags = self.flags | FL_HEIST_ITEM;
 	self.touch = item_heist_touch;
 	self.throw = item_heist_throw;
-	self.solid = SOLID_TRIGGER;
-	self.movetype = MOVETYPE_NONE;
 
-	setmodel(self, self.model);
-	setsize(self, self.mins, self.maxs);
-	setorigin(self, self.origin);
 
-	self.cacheMins = self.mins;
-	self.cacheMaxs = self.maxs;
-
+	precache_model(self.model);
 
 	if(self.inv_item_encumber == IT_ENCUMBER_DISARM){
 		self.view_ofs = '0 0 4';
+		self.view_ofs_x = self.maxs_x / 2;
 		if(self.classname == "item_heist_ammo"){
+			self.solid = SOLID_BSP;
+			setmodel(self, self.model);
+			setsize(self, self.mins, self.maxs);
+
 			self.view_ofs_x = self.maxs_x / 2;
 			self.view_ofs_y = self.maxs_z / -2;
+			self.view_ofs_z = self.maxs_y / 2;
 		}
 		if(self.classname == "item_heist_sigil"){
-			self.view_ofs_x = self.maxs_x / 2;
-			self.view_ofs_y = self.maxs_z / 3;
 			self.view_ofs_z = self.maxs_y;
+			self.view_ofs_y = self.maxs_z / -4.5;
 		}
 		if(self.classname == "item_heist_gib"){
-			self.view_ofs_x = self.maxs_x / 3;
-			self.view_ofs_y = self.maxs_z / -2;
-			self.view_ofs_z = self.maxs_y * 1.25;
+			self.view_ofs_x = self.maxs_x / 2;
+			self.view_ofs_z = self.maxs_z + 16;
+			self.view_ofs_y = self.maxs_z / 2;
 		}
 	}
 	else{
-		self.view_ofs_x = self.maxs_x / -2 - 8;
-		self.view_ofs_z = self.maxs_x / 2 + 4;
-		self.view_ofs_y = self.maxs_z / 2;
+		if(self.classname == "item_heist_gib"){
+			self.view_ofs_x = self.maxs_x / -2 - 8;
+			self.view_ofs_z = self.maxs_x / 2 + 8;
+			self.view_ofs_y = self.maxs_z / 2 + 2;
+		}
+		else{
+			self.view_ofs_x = self.maxs_x / -2 - 8;
+			self.view_ofs_z = self.maxs_x / 2 + 4;
+			self.view_ofs_y = self.maxs_z / 2;
+		}
 	}
 
-	droptofloor();
+	if(self.isMapObj == TRUE){
+		self.solid = SOLID_BSP;
+		self.movetype = MOVETYPE_NONE;
+		setmodel(self, self.model);
+		setsize(self, self.mins, self.maxs);
+		setorigin(self, self.origin);
+		self.solid = SOLID_TRIGGER;
+		droptofloor();
+		self.cacheMins = self.mins;
+		self.cacheMaxs = self.maxs;
+	}
 };
 
 void() item_heist_th_carry;
@@ -75,11 +88,11 @@ void() item_heist_touch={
 		return;
 	}
 
-	if(other.inv_item_heist){
+	if(self.velocity != '0 0 0'){
 		return;
 	}
 
-	if(self.velocity != '0 0 0'){
+	if(other.inv_item_heist){
 		return;
 	}
 
@@ -112,6 +125,9 @@ void() item_heist_touch={
 	setorigin(self, self.origin);
 
 	self.frame = 0;
+
+	self.flags = self.flags - (self.flags & FL_ONGROUND);
+
 	self.think = item_heist_th_carry;
 	self.nextthink = time + 0.01;
 };
@@ -119,8 +135,8 @@ void() item_heist_touch={
 
 void() item_heist_th_carry={
 
-	vector plrView;
-	vector v;
+	local vector plrView;
+	local vector v;
 	
 	self.angles = self.owner.v_angle;
 	
@@ -128,17 +144,17 @@ void() item_heist_th_carry={
 
 	self.angles_x = self.angles_x * 0.25;
 	if(self.inv_item_encumber != IT_ENCUMBER_DISARM || self.classname == "item_heist_gib"){
-		self.angles_y = self.angles_y - 180;
+		self.angles_y = self.owner.angles_y - 180;
 	}
 	
 	makevectors(plrView);
 	v = self.owner.origin + (v_forward * self.view_ofs_z) + (v_right * self.view_ofs_x) + (v_up * self.view_ofs_y);
 
-	setorigin(self,v);
+	setorigin(self, v);
 	
 	self.frame = 0;
 	self.think = item_heist_th_carry;
-	self.nextthink = time + 0.01;
+	self.nextthink = time + 0.001;
 	self.oldorigin = v;
 };
 
@@ -148,76 +164,98 @@ void() item_heist_th_carry={
 */
 void() item_heist_throw={
 
-	vector v;
-	vector tOrg;
-	entity this;
+	local vector v;
+	local vector tOrg;
+	local entity this;
 
-	self.owner.flags = self.owner.flags - (self.owner.flags & FL_HEIST_ITEM);
-	self.owner.inv_item_heist = world;
-	self.owner.inv_item_encumber = 0;
-
-	//restore weapon
-	if(self.inv_item_encumber == IT_ENCUMBER_DISARM){
-		this = self;
-		self = self.owner;
-			self.weapon = self.weapon_last;
-			W_SetCurrentAmmo();
-		self = this;
-	}
-
-	self.inv_item_throw_owner = self.owner;
 	self.solid = SOLID_NOT;
 	self.movetype = MOVETYPE_TOSS;
+	self.takedamage = DAMAGE_NO;
+	if(self.owner != world){
+		self.owner.solid = SOLID_NOT;
+		self.owner.flags = self.owner.flags - (self.owner.flags & FL_HEIST_ITEM);
+		self.owner.inv_item_heist = world;
+		self.owner.inv_item_encumber = 0;
+		//restore weapon
+		if(self.inv_item_encumber == IT_ENCUMBER_DISARM){
+			this = self;
+			self = self.owner;
+				self.weapon = self.weapon_last;
+				W_SetCurrentAmmo();
+			self = this;
+		}
+		self.inv_item_throw_owner = self.owner;
+		makevectors(self.owner.angles);
+		
+		//detect wall
+		traceline(self.owner.origin, self.owner.origin + (v_forward * 600), TRUE, self.owner);
 
-	makevectors(self.owner.angles);
-	v = self.owner.origin + (v_forward *1);
+		if(vlen(trace_endpos - self.owner.origin) < 64){
+			v = self.owner.origin + (v_forward * -10);
 
-	self.movedir = normalize(v - self.owner.origin);
+			self.tempDir = normalize( self.owner.origin - v);
+			
+			tOrg = self.owner.origin + (v_forward * -48);
+		}
+		else{
+			v = self.owner.origin + (v_forward * 10);
+			
+			self.tempDir = normalize(v - self.owner.origin);
+			
 
-	tOrg = self.owner.origin;// + (v_forward * 48);
+			tOrg = self.owner.origin + (v_forward * 48);
+		}
+
+		self.owner = world;
+	}
+	else{
+		self.inv_item_throw_owner = world;
+		tOrg = self.origin;
+	}
+
+	self.timer_item_throw_solid = time + 0.25;
 	self.think = th_item_heist_thrown;
 	self.nextthink = time + 0.01;
-	
 	setorigin(self, tOrg);
-
-	self.owner = world;
 };
 
 void() th_item_heist_thrown={
-	self.solid = SOLID_BBOX;
-	setsize(self, VEC_ORIGIN, VEC_ORIGIN);
-	self.velocity = self.movedir * 300 * self.inv_item_throw_wt;
+
+	if((self.inv_item_throw_owner.flags & FL_CLIENT)){
+		self.inv_item_throw_owner.solid = SOLID_SLIDEBOX;
+	}
+
+	//self.solid = SOLID_BBOX;
+	self.velocity = self.tempDir * 300 * self.inv_item_throw_wt;
 	self.velocity_z = 250 * self.inv_item_throw_wt;
 
 	self.think = item_heist_land;
 	self.nextthink = time + 0.1;
 };
 
-void() th_item_heist_place={
-
-	entity player;
-
-	player = self.inv_item_throw_owner;
-
-	if((player.flags & FL_ONGROUND)){
-		makevectors(player.angles);
-		traceline(player.origin, player.origin + (v_up * -512), FALSE, player);
-		setorigin(self, trace_endpos + (v_up * self.maxs_z));
-		droptofloor();
-	}
-	self.timer_item_thrown_touch = time + 4;
-
-};
-
 void() item_heist_land={
 
-	if(self.velocity){
+	if(self.velocity != '0 0 0'){
+		if(time > self.timer_item_throw_solid){
+			if(pointcontents(self.origin) == CONTENT_EMPTY){
+				if(self.solid != SOLID_SLIDEBOX){
+					self.solid = SOLID_SLIDEBOX;
+				}
+			}
+		}
 		self.think = item_heist_land;
 		self.nextthink = time + 0.01;
 		return;
 	}
 
-	self.angles = '0 0 0';
+	if(self.classname == "item_heist_gib"){
+		self.angles = [0, math_quant_angle(self.angles_y), 0];
+	}
+	else{
+		self.angles = '0 0 0';
+	}
+
+	
 	self.velocity = '0 0 0';
 	self.avelocity = '0 0 0';
 
@@ -239,14 +277,14 @@ void() item_heist_land={
 //==============
 // THE ITEMS
 //==============
-void() item_heist_sigil={
 
-	if(!self.inv_item_encumber){
-		self.inv_item_encumber = IT_ENCUMBER_DISARM;
-	}
+void() item_heist_sigil_spawn={
 
 	if((self.spawnflags & SPAWNFLAG_MDL_RAND)){
 		self.ent_mdl_idx = fabs(rint(random()*3));
+	}
+	if(!self.inv_item_encumber){
+		self.inv_item_encumber = IT_ENCUMBER_DISARM;
 	}
 
 	self.inv_item_throw_wt = 1.0;
@@ -263,17 +301,20 @@ void() item_heist_sigil={
 
 	item_heist();
 };
+void() item_heist_sigil={
 
-void() item_heist_ammo={
+	self.isMapObj = TRUE;
+	item_heist_sigil_spawn();
+};
 
-	if(!self.inv_item_encumber){
-		self.inv_item_encumber = IT_ENCUMBER_DISARM;
-	}
+void() item_heist_ammo_spawn={
 
 	if((self.spawnflags & SPAWNFLAG_MDL_RAND)){
 		self.ent_mdl_idx = fabs(rint(random()*3));
 	}
-
+	if(!self.inv_item_encumber){
+		self.inv_item_encumber = IT_ENCUMBER_DISARM;
+	}
 	self.model = "maps/b_shell1.bsp";
 	self.inv_item_throw_wt = 0.85;
 	if(self.ent_mdl_idx == 1){
@@ -288,11 +329,25 @@ void() item_heist_ammo={
 		self.model = "maps/b_batt1.bsp";
 		self.inv_item_throw_wt = 0.67;
 	}
+	if(self.ent_mdl_idx == 4){
+		self.model = "maps/heist_box1.bsp";
+		self.inv_item_throw_wt = 0.75;
+	}
+	if(self.ent_mdl_idx == 5){
+		self.model = "maps/heist_comp1.bsp";
+		self.inv_item_throw_wt = 0.85;
+	}
 
 	item_heist();
 };
 
-void() item_heist_pack={
+void() item_heist_ammo={
+
+	self.isMapObj = TRUE;
+	item_heist_ammo_spawn();
+};
+
+void() item_heist_pack_spawn={
 
 	if(!self.inv_item_encumber){
 		self.inv_item_encumber = IT_ENCUMBER_DISARM;
@@ -300,6 +355,10 @@ void() item_heist_pack={
 
 	self.model = "progs/backpack.mdl";
 	self.inv_item_throw_wt = 0.85;
+	item_heist();
+};
+
+void() item_heist_pack={
 
 	/*self.colormod = '1.0 1.0 1.0';
 	if(self.ent_mdl_idx == 1){
@@ -312,21 +371,22 @@ void() item_heist_pack={
 		self.colormod = '1.15 0.33 0.33';
 	}*/
 
-	item_heist();
+	self.isMapObj = TRUE;
+	item_heist_pack_spawn();
 };
 
-void() item_heist_gib={
+void(float mdlIndex) item_heist_gib_spawn={
+	self.ent_mdl_idx = mdlIndex;
+	if((self.spawnflags & SPAWNFLAG_MDL_RAND)){
+		self.ent_mdl_idx = fabs(rint(random()*9));
+	}
+	self.model = "progs/h_player.mdl";
+	self.inv_item_throw_wt = 1.0;
 
 	if(!self.inv_item_encumber){
 		self.inv_item_encumber = IT_ENCUMBER_SHOOT;
 	}
 
-	if((self.spawnflags & SPAWNFLAG_MDL_RAND)){
-		self.ent_mdl_idx = fabs(rint(random()*9));
-	}
-
-	self.model = "progs/h_player.mdl";
-	self.inv_item_throw_wt = 1.0;
 	if(self.ent_mdl_idx == 1){
 		self.model = "progs/h_guard.mdl";
 		self.inv_item_encumber = IT_ENCUMBER_SHOOT;
@@ -370,6 +430,36 @@ void() item_heist_gib={
 		self.inv_item_encumber = IT_ENCUMBER_DISARM;
 		self.inv_item_throw_wt = 0.5;
 	}
-	
 	item_heist();
+};
+
+void() item_heist_gib={
+	self.isMapObj = TRUE;
+
+	item_heist_gib_spawn(self.ent_mdl_idx);
+};
+
+void(float mdlId, vector dir) ThrowHeistItemGib={
+
+	self.classname = "item_heist_gib";
+	item_heist_gib_spawn(mdlId);
+	setmodel(self, self.model);
+	setsize(self, self.mins, self.maxs);
+	self.cacheMins = self.mins;
+	self.cacheMaxs = self.maxs;
+
+	self.frame = 0;
+	self.nextthink = -1;
+
+	//setsize(self, '-16 -16 0', '16 16 56');
+	self.solid = SOLID_NOT;
+	self.takedamage = DAMAGE_NO;
+	self.movetype = MOVETYPE_NONE;
+
+	self.origin_z = self.origin_z - 24;
+	self.flags = self.flags - (self.flags & FL_ONGROUND);
+	self.tempDir = dir;
+	self.think = self.throw;
+	self.nextthink = time + 0.001;
+
 };

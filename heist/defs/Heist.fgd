@@ -40,6 +40,11 @@
 	killtarget(target_destination) : "Killtarget"
 ]
 
+@baseclass = HeistGib[
+	spawnflags(Flags) = [
+		8 : "Heist Gib" : 0
+	]
+]
 
 
 //
@@ -196,7 +201,7 @@
 // monsters
 //
 
-@baseclass base(Angle, Appearflags, Target, Targetname) color(220 0 0) = Monster
+@baseclass base(Angle, Appearflags, Target, Targetname, HeistGib) color(220 0 0) = Monster
 [
 	spawnflags(Flags) =
 	[
@@ -582,7 +587,7 @@
 //		HEIST MODE ADD-ON
 //=============================================
 
-@SolidClass base(Targetname, Target) = trigger_heist_item_bin : "Trigger: Heist Bin"
+@SolidClass base(Targetname, Target) = trigger_heist_item_bin : "Trigger: Heist Bin,  Players throw item_heist into trigger or walk into trigger."
 [
 	spawnflags(flags) = 
 		[
@@ -592,13 +597,25 @@
 	count(integer) : "count" : 1
 ]
 
+@SolidClass base(Targetname, Target) = trigger_heist_item_pile : "Trigger: Heist Pile, gives player a specific copy of a set heist item, counting down (if present)."
+[
+	spawnflags(flags) = 
+		[
+			1: "START_OFF" : 0
+			8: "KILL_WHEN_DONE" : 0
+			16 : "REMOVE_WHEN_DONE" : 0
+		]
+	count(integer) : "count" : 1
+	group(string) : "item_heist_* object to clone and give to player"
+]
+
 @PointClass base(Targetname, Target) size(-16 -16 -24, 16 16 24) color(0 255 255)= heist_endzone : "Heist Endzone"
 [
 	spawnflags(flags) = [ 1: "START_OFF" : 0]
 	trig_radius(float) : "radius to count players" : 64.0
 ]
 
-@baseclass color(137 185 203) size(-8 -8 -8, 8 8 8) = HeistItem
+@baseclass base(Targetname) color(137 185 203) size(-8 -8 -8, 8 8 8) = HeistItem
 [
 	spawnflags(Flags) =
 	[
@@ -625,6 +642,8 @@
 ]
 
 @PointClass base(HeistItem) size(0 0 0, 32 32 56) model({{
+	ent_mdl_idx == "5" -> ":maps/heist_comp1.bsp",  
+	ent_mdl_idx == "4" -> ":maps/heist_box1.bsp",  
 	ent_mdl_idx == "3" -> ":maps/b_batt1.bsp",  
 	ent_mdl_idx == "2" -> ":maps/b_rock1.bsp", 
 	ent_mdl_idx == "1" -> ":maps/b_nail1.bsp",
@@ -637,6 +656,8 @@
 		1 : "Nails"
 		2 : "Rockets"
 		3 : "Cells"
+		4 : "Crate"
+		5 : "Computer"
 	]
 ]
 
@@ -665,6 +686,7 @@
 }})= item_heist_gib: "Heist Item - Monster Head"
 [
 	inv_item_encumber(integer) : "Player movement effect" : 1
+
 	ent_mdl_idx(choices) : "Gib Model" : 0 = 
 		[
 			0 : "Ranger"
