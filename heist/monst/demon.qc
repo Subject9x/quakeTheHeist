@@ -177,7 +177,12 @@ void() demon_die =
 	{
 		sound(self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
 		
-		ThrowHead("progs/h_demon.mdl", self.health);
+		if((self.spawnflags & SPAWNFLAG_HEIST_GIB)){
+			ThrowHeistItemGib(MONST_GIB_ID_FIEND, [crandom()*1, 0, random()*1]);
+		}
+		else{
+			ThrowHead("progs/h_demon.mdl", self.health);
+		}
 		ThrowGib("progs/gib1.mdl", self.health);
 		ThrowGib("progs/gib1.mdl", self.health);
 		ThrowGib("progs/gib1.mdl", self.health);

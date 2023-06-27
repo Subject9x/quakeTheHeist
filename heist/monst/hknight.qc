@@ -225,10 +225,15 @@ void() hknight_dieb9 = [ $deathb9, hknight_dieb9 ] {};
 void() hknight_die =
 {
 // check for gib
-	if (self.health < -40)
+	if (self.health < -40 || (self.spawnflags & SPAWNFLAG_HEIST_GIB))
 	{
 		sound(self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
-		ThrowHead("progs/h_hellkn.mdl", self.health);
+		if((self.spawnflags & SPAWNFLAG_HEIST_GIB)){
+			ThrowHeistItemGib(MONST_GIB_ID_HELLKNIGHT, [crandom()*1, 0, random()*1]);
+		}
+		else{
+			ThrowHead("progs/h_hellkn.mdl", self.health);
+		}
 		ThrowGib("progs/gib1.mdl", self.health);
 		ThrowGib("progs/gib2.mdl", self.health);
 		ThrowGib("progs/gib3.mdl", self.health);

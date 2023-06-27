@@ -21,32 +21,50 @@ void() item_heist={
 
 
 	self.flags = self.flags | FL_HEIST_ITEM;
-	self.touch = item_heist_touch;
+	//self.touch = item_heist_touch; //WARN - use DP/FTE
+	self.pinged = item_heist_touch; //WARN - vanilla compat.
+
 	self.throw = item_heist_throw;
 
+	self.root_class = "heist_item";
 
 	precache_model(self.model);
 
+	if(self.isMapObj == TRUE){
+		self.solid = SOLID_BSP;
+		self.movetype = MOVETYPE_NONE;
+		setmodel(self, self.model);
+		setsize(self, self.mins, self.maxs);
+		setorigin(self, self.origin);
+		self.solid = SOLID_TRIGGER;
+		droptofloor();
+		self.cacheMins = self.mins;
+		self.cacheMaxs = self.maxs;
+	}
+	else{
+		setmodel(self, self.model);
+		setsize(self, self.mins, self.maxs);
+	}
+
 	if(self.inv_item_encumber == IT_ENCUMBER_DISARM){
 		self.view_ofs = '0 0 4';
-		self.view_ofs_x = self.maxs_x / 2;
 		if(self.classname == "item_heist_ammo"){
 			self.solid = SOLID_BSP;
 			setmodel(self, self.model);
 			setsize(self, self.mins, self.maxs);
+			self.solid = SOLID_TRIGGER;
 
 			self.view_ofs_x = self.maxs_x / 2;
 			self.view_ofs_y = self.maxs_z / -2;
 			self.view_ofs_z = self.maxs_y / 2;
 		}
 		if(self.classname == "item_heist_sigil"){
-			self.view_ofs_z = self.maxs_y;
-			self.view_ofs_y = self.maxs_z / -4.5;
+			self.view_ofs_z = self.maxs_z * 2;
+			self.view_ofs_y = self.maxs_z / -6;
 		}
 		if(self.classname == "item_heist_gib"){
-			self.view_ofs_x = self.maxs_x / 2;
-			self.view_ofs_z = self.maxs_z + 16;
-			self.view_ofs_y = self.maxs_z / 2;
+			self.view_ofs_z = self.maxs_z + 4;
+			self.view_ofs_y = self.maxs_z / -4;
 		}
 	}
 	else{
@@ -60,18 +78,6 @@ void() item_heist={
 			self.view_ofs_z = self.maxs_x / 2 + 4;
 			self.view_ofs_y = self.maxs_z / 2;
 		}
-	}
-
-	if(self.isMapObj == TRUE){
-		self.solid = SOLID_BSP;
-		self.movetype = MOVETYPE_NONE;
-		setmodel(self, self.model);
-		setsize(self, self.mins, self.maxs);
-		setorigin(self, self.origin);
-		self.solid = SOLID_TRIGGER;
-		droptofloor();
-		self.cacheMins = self.mins;
-		self.cacheMaxs = self.maxs;
 	}
 };
 
@@ -103,6 +109,11 @@ void() item_heist_touch={
 	if(time < self.timer_item_thrown_touch && other == self.inv_item_throw_owner){
 		return;
 	}
+	
+	//WARN - use DP/FTE for this feature.
+	//if(!other.button1){
+	//	return;
+	//}
 
 	other.flags = other.flags | FL_HEIST_ITEM;
 	other.inv_item_heist = self;
@@ -255,7 +266,6 @@ void() item_heist_land={
 		self.angles = '0 0 0';
 	}
 
-	
 	self.velocity = '0 0 0';
 	self.avelocity = '0 0 0';
 
@@ -265,7 +275,7 @@ void() item_heist_land={
 	}
 	else{
 		self.solid = SOLID_TRIGGER;
-		self.touch = item_heist_touch;
+		//self.touch = item_heist_touch;
 	}
 	if(!(self.flags & FL_ONGROUND)){
 		droptofloor();
@@ -430,6 +440,16 @@ void(float mdlIndex) item_heist_gib_spawn={
 		self.inv_item_encumber = IT_ENCUMBER_DISARM;
 		self.inv_item_throw_wt = 0.5;
 	}
+	if(self.ent_mdl_idx == 10){
+		self.model = "progs/fish.mdl";
+		self.inv_item_encumber = IT_ENCUMBER_SHOOT;
+		self.inv_item_throw_wt = 1.25;
+	}
+	if(self.ent_mdl_idx == 11){
+		self.model = "progs/h_mega.mdl";
+		self.inv_item_encumber = IT_ENCUMBER_DISARM;
+		self.inv_item_throw_wt = 0.75;
+	}
 	item_heist();
 };
 
@@ -443,8 +463,7 @@ void(float mdlId, vector dir) ThrowHeistItemGib={
 
 	self.classname = "item_heist_gib";
 	item_heist_gib_spawn(mdlId);
-	setmodel(self, self.model);
-	setsize(self, self.mins, self.maxs);
+
 	self.cacheMins = self.mins;
 	self.cacheMaxs = self.maxs;
 
@@ -456,7 +475,7 @@ void(float mdlId, vector dir) ThrowHeistItemGib={
 	self.takedamage = DAMAGE_NO;
 	self.movetype = MOVETYPE_NONE;
 
-	self.origin_z = self.origin_z - 24;
+	self.origin_z = self.origin_z - 8;
 	self.flags = self.flags - (self.flags & FL_ONGROUND);
 	self.tempDir = dir;
 	self.think = self.throw;

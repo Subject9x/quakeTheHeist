@@ -1239,6 +1239,11 @@ ImpulseCommands
 */
 void() ImpulseCommands =
 {
+	local entity oldOther;	//WARN - vanilla compat.
+	local entity this;	//WARN - vanilla compat.
+	local entity items;	//WARN - vanilla compat.
+	local float radius;	//WARN - vanilla compat.
+
 	if (self.impulse >= 1 && self.impulse <= 8)
 		W_ChangeWeapon();
 
@@ -1257,6 +1262,30 @@ void() ImpulseCommands =
 			self.inv_item_heist.nextthink = time + 0.01;
 		}
 	}
+
+	//WARN - vanilla QC option only, disable if using a port like DP or FTE!
+	if(!self.inv_item_heist){
+		if(self.impulse == CL_IMPULSE_CLIENT_USE){
+			makevectors(self.v_angle);
+
+			items = findradius(self.origin + self.view_ofs + (v_forward * 32), 32) ;
+			while(items){
+				if(items.root_class == CONST_ITEM_CLASS){
+					oldOther = other;
+					this = self;
+	
+					other = this;
+					self = items;
+						self.pinged();
+					self = this;
+					other = oldOther;
+				}
+				items = items.chain;
+			}
+		}
+	}
+	//============================================================================
+
 	if (self.impulse == 255)
 		QuadCheat();
 
@@ -1272,6 +1301,19 @@ Called every frame so impulse events can be handled as well as possible
 */
 void() W_WeaponFrame =
 {
+// check interactions
+// TODO - DP/FTE has working buttonuse / buttonX support.
+/*	if(self.button1){
+		makevectors(self.v_angle);
+		
+		traceline(self.origin + self.view_ofs, self.origin + self.view_ofs + (v_forward * 64), FALSE, self);
+		dbg_line(self.origin + self.view_ofs, trace_endpos);
+
+		dprint("\n");
+		dprint(trace_ent.classname);
+		dprint("\n");
+	}*/
+//============================================================================
 	if (time < self.attack_finished)
 		return;
 
@@ -1285,6 +1327,8 @@ void() W_WeaponFrame =
 			W_Attack();
 		}
 	}
+
+
 };
 
 /*

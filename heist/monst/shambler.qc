@@ -342,10 +342,15 @@ void() sham_death11 = [ $death11, sham_death11 ] {};
 void() sham_die =
 {
 // check for gib
-	if (self.health < -60)
+	if (self.health < -60 || (self.spawnflags & SPAWNFLAG_HEIST_GIB))
 	{
 		sound(self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
-		ThrowHead("progs/h_shams.mdl", self.health);
+		if((self.spawnflags & SPAWNFLAG_HEIST_GIB)){
+			ThrowHeistItemGib(MONST_GIB_ID_SHMBLR, [crandom()*1, 0, random()*1]);
+		}
+		else{
+			ThrowHead("progs/h_shams.mdl", self.health);
+		}
 		ThrowGib("progs/gib1.mdl", self.health);
 		ThrowGib("progs/gib2.mdl", self.health);
 		ThrowGib("progs/gib3.mdl", self.health);

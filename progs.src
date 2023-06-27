@@ -6,6 +6,9 @@ defs.qc
 // HEIST MOD DEF
 heist/defs/heist_defs.qc
 //===========================
+//HORDE MOD
+horde/defs/horde_defs.qc
+//============================
 subs.qc
 fight.qc
 ai.qc
@@ -30,6 +33,10 @@ misc.qc
 heist/item_heist.qc
 heist/trigger_heist.qc
 //===========================
+//HORDE MOD
+horde/func_mob_waves.qc
+//============================
+
 
 heist/monst/ogre.qc
 heist/monst/demon.qc

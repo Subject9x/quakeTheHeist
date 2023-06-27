@@ -11,10 +11,10 @@
 #define SPAWNFLAG_KILL_ON_DONE 8
 #define SPAWNFLAG_REMOVE_DONE 16
 
+#define SPAWNFLAG_HEIST_GIB 8	//monster dies and makes heist item gib
+
 #define IT_ENCUMBER_SHOOT 1		//player encumbered but allowed to use weapons.
 #define IT_ENCUMBER_DISARM 2	//player encumbered,and item occupies active weapon slot.
-
-#define SPAWNFLAG_HEIST_GIB 8	//monster dies and makes heist item gib
 
 #define MONST_GIB_ID_SOLDIER 1
 #define MONST_GIB_ID_KNIGHT 2
@@ -25,6 +25,11 @@
 #define MONST_GIB_ID_FIEND 7
 #define MONST_GIB_ID_SHAL 8
 #define MONST_GIB_ID_SHMBLR 9
+#define MONST_GIB_ID_FISH 10
+#define MONST_GIB_ID_ENFRC 11
+
+#define CONST_ITEM_CLASS "heist_item"
+.string root_class;	//WARN - vanilla compat.
 
 //Action timer balance
 #define TIME_ITEM_PICK_GIB 10
@@ -35,6 +40,7 @@
 #define TIME_ACTION_BUTTON_PRESS 5
 
 #define CL_IMPULSE_ITEM_THROW 16
+#define CL_IMPULSE_CLIENT_USE 17	//compatibility for vanilla
 
 .float ent_mdl_idx;
 .string group;
@@ -45,7 +51,8 @@
 .float trig_radius;
 .vector tempDir;
 
-.void() throw;
+.void() pinged;	//used for "use-key" callback from player.
+.void() throw;	// heist_item thrown.
 
 .entity inv_item_throw_owner;	//who threw that!?
 .float inv_item_throw_wt;	//multiplier for throw speed
@@ -53,15 +60,14 @@
 .float inv_item_encumber;	//0, 1, 2 - encumbrance setting
 .entity inv_item_heist;	//specific entity player is carrying
 
-
-
-
-
 // Action timers
 .float timer_action_start;
 .float timer_action_length;
 .float timer_item_thrown_touch;	//cooldown before retouch IF no space to throw!
 .float timer_item_throw_solid;	//timer until item becomes solid
+
+
+
 
 .float weapon_last; // cache weapon for post-item-throw
 
@@ -70,6 +76,8 @@ entity ENT_CLIENT1;
 entity ENT_CLIENT2;
 entity ENT_CLIENT3;
 entity ENT_CLIENT4;
+
+// Assault waves
 
 void(float mdlId, vector dir) ThrowHeistItemGib;
 
@@ -95,4 +103,25 @@ float(float ang) math_quant_angle={
 	f = ceil(f);
 
 	return f * 90;
+};
+
+float(vector org, vector pos, vector neg) math_point_in_area={
+
+	if(org_x > pos_x || org_x < neg_x){
+		return FALSE;
+	}
+	if(org_y > pos_y || org_y < neg_y){
+		return FALSE;
+	}
+	if(org_z > pos_z || org_z < neg_z){
+		return FALSE;
+	}
+	
+	return TRUE;
+};
+
+vector(entity brush) math_brush_origin={
+
+	return brush.absmin - brush.absmax;
+
 };

@@ -451,10 +451,15 @@ void() ogre_bdie10 = [ $bdeath10, ogre_bdie10 ] {};
 void() ogre_die =
 {
 	// check for gib
-	if (self.health < -80)
+	if (self.health < -80 || (self.spawnflags & SPAWNFLAG_HEIST_GIB))
 	{
 		sound(self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
-		ThrowHead("progs/h_ogre.mdl", self.health);
+		if((self.spawnflags & SPAWNFLAG_HEIST_GIB)){
+			ThrowHeistItemGib(MONST_GIB_ID_OGRE, [crandom()*1, 0, random()*1]);
+		}
+		else{
+			ThrowHead("progs/h_ogre.mdl", self.health);
+		}
 		ThrowGib("progs/gib3.mdl", self.health);
 		ThrowGib("progs/gib3.mdl", self.health);
 		ThrowGib("progs/gib3.mdl", self.health);

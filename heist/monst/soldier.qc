@@ -256,10 +256,15 @@ void() army_cdie11 = [ $deathc11, army_cdie11 ] {};
 void() army_die =
 {
 // check for gib
-	if (self.health < -35)
+	if (self.health < -35 || (self.spawnflags & SPAWNFLAG_HEIST_GIB))
 	{
 		sound(self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
-		ThrowHead("progs/h_guard.mdl", self.health);
+		if((self.spawnflags & SPAWNFLAG_HEIST_GIB)){
+			ThrowHeistItemGib(MONST_GIB_ID_SOLDIER, [crandom()*1, 0, random()*1]);
+		}
+		else{
+			ThrowHead("progs/h_guard.mdl", self.health);
+		}
 		ThrowGib("progs/gib1.mdl", self.health);
 		ThrowGib("progs/gib2.mdl", self.health);
 		ThrowGib("progs/gib3.mdl", self.health);

@@ -12,11 +12,11 @@ void() trig_item_heist_touch={
         return;
     }
     activator = other;
+    other.flags = other.flags - (other.flags  & FL_HEIST_ITEM);
 
     if((other.flags & FL_CLIENT)){
         player = other;
         itm = player.inv_item_heist;
-        player.flags = player.flags - (player.flags  & FL_HEIST_ITEM);
         player.inv_item_encumber = 0;
         player.inv_item_heist = world;
         itm.owner = world;
@@ -41,8 +41,7 @@ void() trig_item_heist_touch={
     if((self.spawnflags & SPAWNFLAG_REMOVE_HEIST_ITM)){
         itm.movetype = MOVETYPE_NONE;
         spawn_tfog(itm.origin);
-        itm.think = SUB_Remove;
-        itm.nextthink = time + 0.1;
+        remove(itm);
     }
     else{
         if(itm.movetype == MOVETYPE_TOSS){
@@ -313,96 +312,57 @@ void() trigger_heist_item_pile={
 
 };
 
+
+void() trigger_heist_start_init={
+
+
+};
+
+void() trigger_heist_start_use={
+
+    self.think = trigger_heist_start_init;
+    self.nextthink = time + self.count;
+};
+
+//map-load delay to make sure map-entiies spawned in.
+void() trigger_heist_start_load={
+
+    local entity t;
+
+    t = find(world, wave_next_id, self.wave_next_id);
+    if(!t){
+        objerror("trigger_heist_start couldn't find first wave entity!\n");
+        remove(self);
+        return;
+    }
+
+    self.wave_next = t;
+};
 /*
-    Monster wave-point, use these to spawn waves of baddies as players are heistin'.
+    Begins wave-spawning system timer
 */
-void() th_heist_mob_spawn_init;
-void() heist_mob_spawn_point={
+void()  trigger_heist_start={
 
-    if(!self.group){
-        objerror("[heist_mob_spawn_point] missing .group field.\n");
+    InitTrigger();
+
+    if(!self.targetname || self.targetname == ""){
+        objerror("trigger_heist_start missing targetname.\n");
         remove(self);
         return;
     }
 
-    self.solid = SOLID_NOT;
-    self.movetype = MOVETYPE_NONE;
-
-    setsize(self, '-16 -16 -24', '16 16 24');
-
-    self.think = th_heist_mob_spawn_init;
-    self.nextthink = time + 0.1;
-};
-void() th_heist_mob_spawn_init={
-
-    local entity points;
-    local float parent;
-
-    parent = FALSE;
-
-    points = find(world, group, self.group);
-    while(points){
-        if(points.classname == "heist_mob_wave_group"){
-            parent = TRUE;
-        }
-        points = points.chain;
-    }
-    if(!parent){
-        objerror("[heist_mob_spawn_point] has no parent wave entity.\n");
-        remove(self);
-        return;
-    }
-};
-
-/*
-    TODO - FINISH THIS
-    Defines a mob-wave composition, and has a collection of [heist_mob_spawn_point] to use.
-*/
-void() th_heist_mob_wave_trig;
-void() heist_mob_wave_use={
-
-    self.think = th_heist_mob_wave_trig;
-    if(self.wait > 0.0){
-        self.nextthink = time + self.wait;
-        return;
-    }
-    self.nextthink = time + 0.1;
-    
-};
-void() th_heist_mob_wave_init;
-void() heist_mob_wave_group={
-
-    self.solid = SOLID_NOT;
-    self.movetype = MOVETYPE_NONE;
-
-    if(!self.group){
-        objerror("[heist_mob_wave_group] missing .group field.\n");
+    if(!self.wave_next_id || self.wave_next_id == ""){
+        objerror("trigger_heist_start missing wave_next_id.\n");
         remove(self);
         return;
     }
 
-    self.use = heist_mob_wave_use;
-    self.think = th_heist_mob_wave_init;
-    self.nextthink = time + 0.5;
-};
-
-//just a validation method for debug
-void() th_heist_mob_wave_init={
-
-    local entity points;
-    
-    points = find(world, group, self.group);
-    if(!points){
-        objerror("[heist_mob_wave_group] has no children spawn points.\n");
-        remove(self);
-        return;
+    if(!self.count){
+        self.count = 60;    //default 60 delay
     }
+    self.use = trigger_heist_start_use;
+
+    self.think = trigger_heist_start_load;
+    self.nextthink = time + 3;
 };
 
-void() th_heist_mob_wave_trig={
-
-    if(TRUE){
-        return;
-    }
-
-};

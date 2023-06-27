@@ -131,6 +131,10 @@ void() f_attack18 = [ $attack18, f_run1 ] { ai_charge(10); };
 void() f_death1 = [ $death1, f_death2 ]
 {
 	sound(self, CHAN_VOICE, "fish/death.wav", 1, ATTN_NORM);
+
+	if((self.spawnflags & SPAWNFLAG_HEIST_GIB)){
+		ThrowHeistItemGib(MONST_GIB_ID_FISH, '0 0 0');
+	}
 };
 void() f_death2 = [ $death2, f_death3 ] {};
 void() f_death3 = [ $death3, f_death4 ] {};

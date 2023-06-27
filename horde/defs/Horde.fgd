@@ -1,0 +1,17 @@
+//
+// Quake: Horde mode modul FGD
+// extension fgd, REQUIRES base Quake.FGD
+//
+
+@PointClass size(-16 -16 -24, 16 16 24) color(0 255 255) = horde_mob_spawn_point : "" 
+[
+	group(string) : "Mob Wave group id" : "wave1"
+]
+
+@SolidClass base(Targetname, Target) = func_horde_wave_group : ""
+[
+	group(string) : "REQUIRED - Wave group id" : "wave1"
+	wait(integer) : "OPTIONAL countdown to fire." : 0
+	wave_interval(float) : "pause-time before retriggering" : 1
+	targetname(string) : "REQUIRED - unique targetname" : "wave1"
+]

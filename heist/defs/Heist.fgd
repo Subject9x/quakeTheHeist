@@ -673,8 +673,10 @@
 ]
 
 @PointClass base(HeistItem) model({{
-	ent_mdl_idx == "9" -> "progs/h_shams.mdl",  
-	ent_mdl_idx == "8" -> "progs/h_shal.mdl", 
+	ent_mdl_idx == "11" -> "progs/h_mega.mdl",
+	ent_mdl_idx == "10" -> "progs/fish.mdl",
+	ent_mdl_idx == "9" -> "progs/h_shams.mdl",
+	ent_mdl_idx == "8" -> "progs/h_shal.mdl",
 	ent_mdl_idx == "7" -> "progs/h_demon.mdl",
 	ent_mdl_idx == "6" -> "progs/h_ogre.mdl",
 	ent_mdl_idx == "5" -> "progs/h_hellkn.mdl",
@@ -699,17 +701,20 @@
 			7 : "Fiend"
 			8 : "Vore"
 			9 : "Shambler"
+			10 : "Fish"
+			11 : "Enforcer"
 		]
 ]
 
-
-@PointClass base(Targetname, Target) size(-16 -16 -24, 16 16 24) color(0 255 255) = heist_mob_wave_group : "" 
+@PointClass size(-16 -16 -24, 16 16 24) color(0 255 255) = horde_mob_spawn_point : "" 
 [
-	group(string) : "Mob Wave group id" : "group"
-	wait(integer) : "OPTIONAL countdown to fire." : 0
+	group(string) : "Mob Wave group id" : "wave1"
 ]
 
-@PointClass size(-16 -16 -24, 16 16 24) color(0 255 255) = heist_mob_spawn_point : "" 
+@SolidClass base(Targetname, Target) = func_horde_wave_group : ""
 [
-	group(string) : "Mob Wave group id" : "group"
+	group(string) : "REQUIRED - Wave group id" : "wave1"
+	wait(integer) : "OPTIONAL countdown to fire." : 0
+	wave_interval(float) : "pause-time before retriggering" : 1
+	targetname(string) : "REQUIRED - unique targetname" : "wave1"
 ]
