@@ -15,3 +15,4 @@
 .entity wave_mob;			// entity chain for mobs in a func_wave
 .entity wave_point;			// entity chain for spawn points in a func_wave
 .entity wave_point_start;	//mark the chain start.
+

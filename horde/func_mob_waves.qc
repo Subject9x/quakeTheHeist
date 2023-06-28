@@ -85,6 +85,11 @@ void() horde_wave_group_use={
 
 };
 
+void() horde_wave_group_spawn_pause={
+
+
+};
+
 void() horde_wave_group_spawn={
 
     local entity mob;
@@ -100,13 +105,6 @@ void() horde_wave_group_spawn={
     //TODO - REFINE / FIX
     point = self.wave_point;
     if(self.wave_mob){
-        if(point){
-            point = point.wave_point;
-        }
-        else{
-            self.wave_point = self.wave_point_start;
-            point = self.wave_point;
-        }
         mob = self.wave_mob;
         mob.flags = mob.flags - (mob.flags & FL_ONGROUND);
         setorigin(mob, point.origin);
@@ -114,11 +112,23 @@ void() horde_wave_group_spawn={
 
         force_retouch = 2;
 
-        mob.think = mob.th_walk;
+        //bad fly-monster patch
+        if(mob.classname == "monster_wizard"){
+            mob.think = flymonster_start;
+        }
+        else{
+            mob.think = walkmonster_start;
+        }
         mob.nextthink = time + 0.1;
 
         self.wave_mob = self.wave_mob.wave_mob;
-        self.wave_point = self.wave_point.wave_point;
+        if(self.wave_point.wave_point){
+            self.wave_point = self.wave_point.wave_point;
+        }
+        else{
+            self.wave_point = self.wave_point_start;
+        }
+        
     }
 
     self.count = self.count - 1;
@@ -145,8 +155,9 @@ void() horde_mob_spawn_point={
     setorigin(self, self.origin);
 
     self.think = th_horde_mob_spawn_init;
-    self.nextthink = time + 1.0;
+    self.nextthink = time + 0.5;
 };
+
 void() th_horde_mob_spawn_init={
 
     local entity funcWave;
@@ -171,6 +182,7 @@ void() th_horde_mob_spawn_init={
 
     if(pointLink){
         pointNext = pointLink.wave_point;
+
         while(pointNext){
             pointLink = pointNext;
             pointNext = pointNext.wave_point;
@@ -181,5 +193,4 @@ void() th_horde_mob_spawn_init={
         funcWave.wave_point = self;
         funcWave.wave_point_start = self;
     }
-
 };
