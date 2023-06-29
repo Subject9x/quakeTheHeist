@@ -254,12 +254,17 @@ void() item_heist_land={
 				}
 			}
 		}
+		if(self.inv_item_heist_end){
+			self.velocity = self.velocity - (self.velocity * 0.33 * frametime);
+		}
 		self.think = item_heist_land;
 		self.nextthink = time + 0.01;
 		return;
 	}
 
 	if(self.classname == "item_heist_gib"){
+		//vanilla quake collisions get indigestion with non-cardinal angles on certain bboxes.
+		//just watch an ammo box model be rendered detached from its QC origin and bounding box.
 		self.angles = [0, math_quant_angle(self.angles_y), 0];
 	}
 	else{

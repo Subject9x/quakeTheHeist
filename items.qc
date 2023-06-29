@@ -486,21 +486,23 @@ void() weapon_touch =
 
 	bound_other_ammo();
 
-// change to the weapon
-	old = other.items;
-	other.items = other.items | new;
-
-	stemp = self;
-	self = other;
-
-	if (!deathmatch)
-		self.weapon = new;
-	else
-		Deathmatch_Weapon(old, new);
-
-	W_SetCurrentAmmo();
-
-	self = stemp;
+	if(!(other.flags & FL_HEIST_ITEM)){
+		// change to the weapon
+			old = other.items;
+			other.items = other.items | new;
+		
+			stemp = self;
+			self = other;
+		
+			if (!deathmatch)
+				self.weapon = new;
+			else
+				Deathmatch_Weapon(old, new);
+		
+			W_SetCurrentAmmo();
+		
+			self = stemp;
+	}
 
 	if (leave)
 		return;
@@ -669,23 +671,23 @@ void() ammo_touch =
 	sound(other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
 	stuffcmd(other, "bf\n");
 
-// change to a better weapon if appropriate
-
-	if (other.weapon == best)
-	{
+	if(!(other.flags & FL_HEIST_ITEM)){
+	// change to a better weapon if appropriate
+		if (other.weapon == best)
+		{
+			stemp = self;
+			self = other;
+			self.weapon = W_BestWeapon();
+			W_SetCurrentAmmo();
+			self = stemp;
+		}
+		
+	// if changed current ammo, update it
 		stemp = self;
 		self = other;
-		self.weapon = W_BestWeapon();
 		W_SetCurrentAmmo();
 		self = stemp;
 	}
-
-// if changed current ammo, update it
-	stemp = self;
-	self = other;
-	W_SetCurrentAmmo();
-	self = stemp;
-
 // remove it in single player, or setup for respawning in deathmatch
 	self.model = string_null;
 	self.solid = SOLID_NOT;
@@ -1294,20 +1296,26 @@ void() BackpackTouch =
 	sound(other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
 	stuffcmd(other, "bf\n");
 
-// change to a better weapon if appropriate
-	if (other.weapon == best)
-	{
-		stemp = self;
-		self = other;
-		self.weapon = W_BestWeapon();
-		self = stemp;
+	
+	if(!(other.flags & FL_HEIST_ITEM)){
+		// change to a better weapon if appropriate
+		if (other.weapon == best)
+		{
+			stemp = self;
+			self = other;
+			self.weapon = W_BestWeapon();
+			self = stemp;
+		}
 	}
 
 
 	remove(self);
 
 	self = other;
-	W_SetCurrentAmmo();
+	
+	if(!(other.flags & FL_HEIST_ITEM)){
+		W_SetCurrentAmmo();
+	}
 };
 
 /*

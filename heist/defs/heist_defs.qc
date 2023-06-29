@@ -67,8 +67,6 @@
 .float timer_item_throw_solid;	//timer until item becomes solid
 
 
-
-
 .float weapon_last; // cache weapon for post-item-throw
 
 float CLIENT_ACTIVE_TOTAL;
@@ -78,6 +76,28 @@ entity ENT_CLIENT3;
 entity ENT_CLIENT4;
 
 // Assault waves
+
+
+void(string msg, vector v) logVec={
+
+	dprint("\n");
+	dprint(msg);
+	dprint(":");
+	dprint(vtos(v));
+	dprint("\n");
+
+};
+
+void(string msg, string val) logStr={
+	
+	dprint("\n");
+	dprint(msg);
+	dprint(":");
+	dprint(val);
+	dprint("\n");
+};
+
+
 
 void(float mdlId, vector dir) ThrowHeistItemGib;
 
@@ -107,6 +127,14 @@ float(float ang) math_quant_angle={
 
 float(vector org, vector pos, vector neg) math_point_in_area={
 
+	/*
+	dprint("\n-math_point_in_area\n");
+	logVec("org", org);
+	logVec("pos", pos);
+	logVec("neg", neg);
+	dprint("\n-------\n");
+	*/
+
 	if(org_x > pos_x || org_x < neg_x){
 		return FALSE;
 	}
@@ -117,11 +145,39 @@ float(vector org, vector pos, vector neg) math_point_in_area={
 		return FALSE;
 	}
 	
+	dprint("\npoint in area[X]\n");
 	return TRUE;
 };
 
 vector(entity brush) math_brush_origin={
 
-	return brush.absmin - brush.absmax;
+	local vector v;
 
+	/*
+	logVec("brush org", brush.origin);
+	logVec("absmax", brush.absmax);
+	logVec("absmin", brush.absmin);
+	logVec("org?", brush.absmax - brush.absmin);
+	*/
+	v_x = (brush.absmax_x - brush.absmin_x) / 2;
+	v_y = (brush.absmax_y - brush.absmin_y) / 2;
+	v_z = (brush.absmax_z - brush.absmin_z) / 2;
+	v = v + brush.absmin;
+
+	//logVec("real org?", v);
+
+	return v;
+
+};
+
+float(vector pos, vector neg) math_brush_radius={
+	local float x;
+	local float y;
+	local float v;
+
+	x = fabs(neg_x - pos_x);
+	y = fabs(neg_y - pos_y);
+	v = (x + y) / 2;
+
+	return v;
 };

@@ -1090,8 +1090,30 @@ void() ClientConnect =
 	bprint(" entered the game\n");
 
 // a client connecting during an intermission can cause problems
-	if (intermission_running)
+	if (intermission_running){
 		ExitIntermission();
+		return
+	}
+
+	if(self == ENT_CLIENT1){
+		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL - 1;
+		ENT_CLIENT1 = world;
+		return;
+	}
+	if(self == ENT_CLIENT2){
+		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL - 1;
+		ENT_CLIENT2 = world;
+		return;
+	}
+	if(self == ENT_CLIENT3){
+		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL - 1;
+		ENT_CLIENT3 = world;
+		return;
+	}
+	if(self == ENT_CLIENT4){
+		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL - 1;
+		ENT_CLIENT4 = world;
+	}
 };
 
 

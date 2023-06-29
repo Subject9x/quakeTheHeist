@@ -44,10 +44,7 @@ void() trig_item_heist_touch={
         remove(itm);
     }
     else{
-        if(itm.movetype == MOVETYPE_TOSS){
-            itm.velocity = itm.velocity * 0.33;
-        }
-        else{
+        if(itm.movetype != MOVETYPE_TOSS){
             traceline(itm.origin, itm.origin + '0 0 -256 ', TRUE, itm);  
             itm.movetype = MOVETYPE_NONE;
             setorigin(itm, trace_endpos);
@@ -312,13 +309,34 @@ void() trigger_heist_item_pile={
 
 };
 
+#define SPAWNFLAG_NOTOUCH 2
 
 void() trigger_heist_start_init={
 
 
 };
 
+
+void() trigger_heist_start_touch={
+
+    if((self.spawnflags & SPAWNFLAG_START_OFF)){
+        self.spawnflags = self.spawnflags - (self.spawnflags & SPAWNFLAG_START_OFF);
+        return;
+    }
+
+
+};
+
 void() trigger_heist_start_use={
+
+    if((self.spawnflags & SPAWNFLAG_START_OFF)){
+        self.spawnflags = self.spawnflags - (self.spawnflags & SPAWNFLAG_START_OFF);
+        if((self.spawnflags & SPAWNFLAG_NOTOUCH)){
+            self.touch = trigger_heist_start_touch;
+        }
+        return;
+    }
+
 
     self.think = trigger_heist_start_init;
     self.nextthink = time + self.count;
@@ -360,8 +378,9 @@ void()  trigger_heist_start={
     if(!self.count){
         self.count = 60;    //default 60 delay
     }
-    self.use = trigger_heist_start_use;
 
+
+    self.use = trigger_heist_start_use;
     self.think = trigger_heist_start_load;
     self.nextthink = time + 3;
 };

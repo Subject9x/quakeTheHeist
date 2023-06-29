@@ -12,12 +12,14 @@ horde/defs/horde_defs.qc
 subs.qc
 fight.qc
 ai.qc
-combat.qc
+heist/combat.qc
 items.qc
 
 heist/weapons.qc
 
-world.qc
+//world.qc
+horde/world.qc
+
 
 heist/client.qc
 
@@ -30,6 +32,7 @@ plats.qc
 misc.qc
 
 // HEIST MOD
+heist/core.qc
 heist/item_heist.qc
 heist/trigger_heist.qc
 //===========================
