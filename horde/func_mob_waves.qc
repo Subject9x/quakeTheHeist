@@ -24,6 +24,7 @@ void() horde_wave_manager={
     }
 
     HORDE_MANAGER.wave_next_id = "1";
+    HORDE_MANAGER.count = 1;
 
 };
 
@@ -56,6 +57,11 @@ void() func_horde_wave_group={
     if(!self.wave_interval){
         self.wave_interval = 1;
     }
+
+    if(!self.wait){
+        self.wait = 1;
+    }
+
     self.attack_state = FUNC_WAVE_STATE_INIT;
     self.use = horde_wave_group_use;
     self.think = horde_wave_group_init;
@@ -71,7 +77,6 @@ void() horde_wave_group_init={
 
     local entity point;
 
-    
     self.owner = HORDE_MANAGER;
 
     v = math_brush_origin(self);
@@ -105,11 +110,12 @@ void() horde_wave_group_init={
     }
     else{
         if(cvar("developer") > 0){
-            dprint("wave point list built.\n");
+            dprint("wave point list built.\n"); //debug
         }
     }
 
     self.attack_state = FUNC_WAVE_STATE_READY;
+    self.count_start = self.count;
 };
 
 void() horde_wave_group_use={
@@ -121,12 +127,19 @@ void() horde_wave_group_use={
 
     if(self.attack_state == FUNC_WAVE_STATE_READY){
         //detects "first-time use"
+        //TODO - EVENT -> VA ""
+        if(self.owner.count == 1){
+            bprint("\n there goes the alarm! we got creeps comin'!\n");
+        }
+        else{
+            bprint("\n Get Ready, more mobs comin'!\n");
+        }
 
     }
     self.attack_state = FUNC_WAVE_STATE_RUN;
 
     self.think = horde_wave_group_spawn;
-    self.nextthink = time + 1;
+    self.nextthink = time + self.wait;
 
 };
 
@@ -143,17 +156,30 @@ void() horde_wave_group_spawn={
     local entity clientTarg;
 
     if(self.count < 0){
+        //TODO - EVENT - VA "you guys really cleaned house! but there'll be more, keep moving!"
+        bprint("\n you guys really cleaned house! but there'll be more, keep moving!\n");
+
         dprint("horde_wave_group_spawn complete!\n");
         self.attack_state = FUNC_WAVE_STATE_DONE;
         self.nextthink = -1;
         multi_trigger();
         return;
     }
+
+    if(self.count == self.count_start){
+        //TODO - EVENT - VA "Here we go, more fuzz!"
+         bprint("\n Here we go, more fuzz!\n");
+    }
     
     point = self.wave_point;
     if(self.wave_mob){
         mob = self.wave_mob;
         mob.flags = mob.flags - (mob.flags & FL_ONGROUND);
+        
+        if((self.spawnflags & SPAWNFLAG_HORDE_GROUP_VFX_TELE)){
+            spawn_tfog(point.origin);
+        }
+        
         setorigin(mob, point.origin);
         mob.angles = point.angles;
 
@@ -196,7 +222,7 @@ void() horde_wave_group_spawn={
 
     self.count = self.count - 1;
     self.think = horde_wave_group_spawn;
-    self.nextthink = time + 1;
+    self.nextthink = time + self.wave_interval;
 
 };
 

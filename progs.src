@@ -15,16 +15,20 @@ ai.qc
 heist/combat.qc
 items.qc
 
+// HEIST MOD
 heist/weapons.qc
+//===========================
 
-//world.qc
+//HORDE MOD
 horde/world.qc
+//============================
 
-
+// HEIST MOD
 heist/client.qc
-
-player.qc
+heist/player.qc
 heist/monsters.qc
+//===========================
+
 doors.qc
 buttons.qc
 triggers.qc

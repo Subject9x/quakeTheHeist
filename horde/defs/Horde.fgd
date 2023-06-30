@@ -14,4 +14,7 @@
 	wait(integer) : "OPTIONAL countdown to fire." : 0
 	wave_interval(float) : "pause-time before retriggering" : 1
 	targetname(string) : "REQUIRED - unique targetname" : "wave1"
+	spawnflags(flags) = [
+		1 : "VFX_TELEPORT" : 0
+	]
 ]
