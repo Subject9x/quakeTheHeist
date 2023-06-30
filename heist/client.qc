@@ -468,6 +468,7 @@ void() PutClientInServer =
 
 	self.classname = "player";
 	self.health = 100;
+	self.health_max = self.health;
 	self.takedamage = DAMAGE_AIM;
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_WALK;
@@ -521,6 +522,10 @@ void() PutClientInServer =
 	}
 
 	spawn_tdeath(self.origin, self);
+
+	//NOTE - heist mod
+	self.inv_item_heist = world;
+	self.flags = self.flags - (self.flags & FL_HEIST_ITEM);
 };
 
 
@@ -659,9 +664,9 @@ void() PlayerDeathThink =
 	}
 
 // wait for any button down
-	if (!self.button2 && !self.button1 && !self.button0)
+	if (!self.button2 && !self.button1 && !self.button0){
 		return;
-
+	}
 	self.button0 = 0;
 	self.button1 = 0;
 	self.button2 = 0;
@@ -1044,6 +1049,9 @@ Called every frame after physics are run
 */
 void() PlayerPostThink =
 {
+
+	local float encumber;
+
 	if (self.view_ofs == '0 0 0')
 		return; // intermission or finale
 	if (self.deadflag)
@@ -1070,9 +1078,21 @@ void() PlayerPostThink =
 		self.jump_flag = 0;
 	}
 
-	if (!(self.flags & FL_ONGROUND))
+	if ((self.flags & FL_ONGROUND)){
+		if(self.velocity){
+			if(self.inv_item_heist){
+				encumber = self.inv_item_heist.inv_item_throw_wt;
+				if(encumber >= 1.0){
+					encumber = 0.0;
+				}
+				encumber = encumber / 2 * 50;
+				self.velocity = self.velocity - (self.velocity * encumber * frametime);
+			}
+		}
+	}
+	else{
 		self.jump_flag = self.velocity_z;
-
+	}
 	CheckPowerups();
 };
 
@@ -1126,6 +1146,23 @@ called when a player disconnects from a server
 */
 void() ClientDisconnect =
 {
+	
+	if(self == ENT_CLIENT1){
+		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL - 1;
+		ENT_CLIENT1 = world;
+	}
+	if(self == ENT_CLIENT2){
+		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL - 1;
+		ENT_CLIENT2 = world;
+	}
+	if(self == ENT_CLIENT3){
+		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL - 1;
+		ENT_CLIENT3 = world;
+	}
+	if(self == ENT_CLIENT4){
+		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL - 1;
+		ENT_CLIENT4 = world;
+	}
 	if (gameover)
 		return;
 	// if the level end trigger has been activated, just return
@@ -1138,6 +1175,7 @@ void() ClientDisconnect =
 	bprint(" frags\n");
 	sound(self, CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE);
 	set_suicide_frame();
+
 };
 
 /*

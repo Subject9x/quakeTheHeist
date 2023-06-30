@@ -2,7 +2,6 @@
 	heist mod
 */
 #define FL_HEIST_ITEM 8192
-#define FL_HEIST_ITEM_END 16384	//to 'end' item in final position, used mostly by trigger
 
 #define SPAWNFLAG_START_OFF 1
 #define SPAWNFLAG_REMOVE_HEIST_ITM 8
@@ -60,14 +59,18 @@
 .float inv_item_encumber;	//0, 1, 2 - encumbrance setting
 .entity inv_item_heist;	//specific entity player is carrying
 
+.float count_start;			//track initial count size.
+
 // Action timers
 .float timer_action_start;
 .float timer_action_length;
 .float timer_item_thrown_touch;	//cooldown before retouch IF no space to throw!
 .float timer_item_throw_solid;	//timer until item becomes solid
 
-
+.float weapon_dmg;	//base damage
 .float weapon_last; // cache weapon for post-item-throw
+
+.float health_max;	
 
 float CLIENT_ACTIVE_TOTAL;
 entity ENT_CLIENT1;
@@ -76,8 +79,6 @@ entity ENT_CLIENT3;
 entity ENT_CLIENT4;
 
 // Assault waves
-
-
 void(string msg, vector v) logVec={
 
 	dprint("\n");
@@ -98,6 +99,14 @@ void(string msg, string val) logStr={
 };
 
 
+void(string msg, float val) logFloat={
+	
+	dprint("\n");
+	dprint(msg);
+	dprint(":");
+	dprint(ftos(val));
+	dprint("\n");
+};
 
 void(float mdlId, vector dir) ThrowHeistItemGib;
 

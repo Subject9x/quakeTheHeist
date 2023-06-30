@@ -313,6 +313,12 @@ void() item_heist_sigil_spawn={
 	if(self.ent_mdl_idx == 3){
 		self.model = "progs/end4.mdl";
 	}
+	if(self.ent_mdl_idx == 4){
+		self.model = "progs/lavaball.mdl";
+	}
+	if(self.ent_mdl_idx == 5){
+		self.model = "progs/v_spike.mdl";
+	}
 
 	item_heist();
 };

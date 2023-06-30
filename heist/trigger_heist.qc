@@ -62,6 +62,14 @@ void() trig_item_heist_touch={
     self.count = self.count - 1;
 
     if(self.count != 0){
+        if(self.count == self.count_start / 2){
+            //TODO - EVENT - VA 
+            bprint("\n great job, rangers, we've got half of what we need!\n");
+        }
+        if(self.count == self.count_start / 4){
+            //TODO - EVENT - VA 
+            bprint("\n Almost there! just a few more items to go!\n");
+        }
         return;
     }
     self.enemy = activator;
@@ -96,6 +104,7 @@ void() trigger_heist_item_bin={
         return;
     }
     self.touch = trig_item_heist_touch;
+    self.count_start = self.count;
 };
 
 void() heist_endzone_trig;
