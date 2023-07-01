@@ -341,6 +341,16 @@ void() sham_death11 = [ $death11, sham_death11 ] {};
 
 void() sham_die =
 {
+// HORDE MODE
+	local entity this;
+
+	if(self.isHordeMob){    
+		this = self;
+		self = self.owner;
+			self.th_die();
+		self = this;	
+	}
+//=============================
 // check for gib
 	if (self.health < -60 || (self.spawnflags & SPAWNFLAG_HEIST_GIB))
 	{
@@ -395,6 +405,7 @@ void() monster_shambler =
 
 	setsize(self, VEC_HULL2_MIN, VEC_HULL2_MAX);
 	self.health = 600;
+	self.health_max = self.health;
 
 	self.th_stand = sham_stand1;
 	self.th_walk = sham_walk1;
@@ -403,6 +414,9 @@ void() monster_shambler =
 	self.th_melee = sham_melee;
 	self.th_missile = sham_magic1;
 	self.th_pain = sham_pain;
+
+	//NOTE - HEIST mod SPAWNFLAG
+	game_monst_set_armor();
 
 	walkmonster_start();
 };

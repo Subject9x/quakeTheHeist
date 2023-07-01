@@ -14,7 +14,10 @@
     server entry-point to wave manager
 */
 void() horde_wave_manager_use;
+void() horde_wave_manager_init;
 void() horde_wave_manager={
+
+    local entity this;
 
     HORDE_MANAGER = spawn();
 
@@ -23,21 +26,81 @@ void() horde_wave_manager={
         return;
     }
 
-    HORDE_MANAGER.wave_next_id = "1";
-    HORDE_MANAGER.count = 1;
-
+    this = self;
+    self = HORDE_MANAGER;
+        self.attack_state = FUNC_WAVE_STATE_INIT;
+        self.think = horde_wave_manager_init;
+        self.nextthink = time + 3.001;
+    self = this;
 };
 
+void() horde_wave_manager_init={
+
+    local entity firstWave;
+    local entity hordeWave;
+    local entity nextWave;
+
+    firstWave = find(world, targetname, world.wave_next_id);
+
+    if(!firstWave){
+        logStr("ERROR(HORDE_MANAGER)", world.wave_next_id);
+        objerror("failed to find first func_horde_wave_group by id!\n");
+        return;
+    }
+
+    //build the chain of waves.
+    //NOTE - DP/FTE can just do findchain();
+    self.wave_next = firstWave;
+    self.count = 1;
+    hordeWave = self.wave_next;
+    
+    while(hordeWave){
+        nextWave = find(hordeWave, wave_next_id, hordeWave.wave_next_id);
+        if(nextWave){
+            hordeWave.wave_next = nextWave;
+            logStr("loaded hordeWave", hordeWave.targetname);   //debug
+            self.count = self.count + 1;
+        }
+        hordeWave = nextWave;
+    }
+
+    self.use = horde_wave_manager_use;
+
+    if(!self.wave_interval || self.wave_interval <= 44.99){
+        self.wave_interval = 45;
+    }
+
+    self.attack_state = FUNC_WAVE_STATE_READY;
+    self.count_start = self.count;
+    self.count = 1;
+};
 
 void() horde_wave_manager_use={
-
-
+    //TODO - VA event
+    logStr("HORDE MANAGER", "USE ");   //debug
+    if(self.wave_next){
+        logStr("HORDE MANAGER- USE()", self.wave_next.targetname);   //debug
+        self.attack_state = FUNC_WAVE_STATE_RUN;
+        self.wave_next.think = self.wave_next.use;
+        self.wave_next.nextthink = time + 1;
+    }
 };
+void() horde_wave_manager_next_wave={
+    //TODO - VA event
+    if(self.wave_next.wave_next){
+        logStr("HORDE MANAGER- NEXT_WAVE()", self.wave_next.targetname);   //debug
+        self.wave_next = self.wave_next.wave_next;
+        self.attack_state = FUNC_WAVE_STATE_RUN;
+        self.wave_next.think = self.wave_next.use;
+        self.wave_next.nextthink = time + self.wave_interval;
+    }
+}
 
 //=====================================================
 void() horde_wave_group_init;
 void() horde_wave_group_use;
 void() horde_wave_group_spawn;
+void() hord_wave_group_mob_dead;
 
 /*
     Wave groups are brush-entities that scan their contents for mobs.
@@ -65,7 +128,7 @@ void() func_horde_wave_group={
     self.attack_state = FUNC_WAVE_STATE_INIT;
     self.use = horde_wave_group_use;
     self.think = horde_wave_group_init;
-    self.nextthink = time + 5;
+    self.nextthink = time + 10.01;
 };
 
 //scan area of brush for any mobs being contained in it.
@@ -85,7 +148,10 @@ void() horde_wave_group_init={
     link = self;
     while(mob){
         if(math_point_in_area(mob.origin, self.absmax, self.absmin)){
+            mob.hordeStart = mob.origin;    //cache map-set start org.
+            mob.isHordeMob = TRUE; //mark as horde mob.
             mob.nextthink = -1; //pause the mob
+
             mob.owner = self;
             self.count = self.count + 1;
             
@@ -116,8 +182,23 @@ void() horde_wave_group_init={
 
     self.attack_state = FUNC_WAVE_STATE_READY;
     self.count_start = self.count;
+    self.wave_size = self.count_start;
+    self.th_die = hord_wave_group_mob_dead;
 };
 
+void() hord_wave_group_mob_dead={
+    if(self.attack_state < FUNC_WAVE_STATE_RUN){
+        return;
+    }
+    self.wave_size = self.wave_size - 1;
+    if(self.wave_size == 0){
+        //WAVE COMPLETE
+        //TODO - EVENT - VA "you guys really cleaned house! but there'll be more, keep moving!"
+        bprint("\n you guys really cleaned house! but there'll be more, keep moving!\n");
+        HORDE_MANAGER.think = horde_wave_manager_next_wave;
+        HORDE_MANAGER.nextthink = time + 1.01;
+    }
+};
 void() horde_wave_group_use={
 
     if(self.attack_state != FUNC_WAVE_STATE_READY){
@@ -156,9 +237,6 @@ void() horde_wave_group_spawn={
     local entity clientTarg;
 
     if(self.count < 0){
-        //TODO - EVENT - VA "you guys really cleaned house! but there'll be more, keep moving!"
-        bprint("\n you guys really cleaned house! but there'll be more, keep moving!\n");
-
         dprint("horde_wave_group_spawn complete!\n");
         self.attack_state = FUNC_WAVE_STATE_DONE;
         self.nextthink = -1;
@@ -232,8 +310,8 @@ void() horde_wave_group_spawn={
 void() th_horde_mob_spawn_init;
 void() horde_mob_spawn_point={
 
-    if(!self.group  || self.group == ""){
-        objerror("[horde_mob_spawn_point] missing .group field.\n");
+    if(!self.wave_point_group  || self.wave_point_group == ""){
+        objerror("[horde_mob_spawn_point] missing .wave_point_group field.\n");
         remove(self);
         return;
     }
@@ -244,7 +322,7 @@ void() horde_mob_spawn_point={
     setorigin(self, self.origin);
 
     self.think = th_horde_mob_spawn_init;
-    self.nextthink = time + 1.0;
+    self.nextthink = time + 2.01;
 };
 
 //wave_point waits a few seconds for all map-ents to spawn in before building its linked list.
@@ -254,9 +332,9 @@ void() th_horde_mob_spawn_init={
     local entity pointLink;
     local entity pointNext;
 
-    funcWave = find(world, group, self.group);
+    funcWave = find(world, targetname, self.wave_point_group);
     if(!funcWave){
-        objerror("missing parent(.group) entity\n");
+        objerror("missing parent(.wave_point_group) entity\n");
         remove(self);
         return;
     }

@@ -450,6 +450,16 @@ void() ogre_bdie10 = [ $bdeath10, ogre_bdie10 ] {};
 
 void() ogre_die =
 {
+// HORDE MODE
+	local entity this;
+
+	if(self.isHordeMob){    
+		this = self;
+		self = self.owner;
+			self.th_die();
+		self = this;	
+	}
+//=============================
 	// check for gib
 	if (self.health < -80 || (self.spawnflags & SPAWNFLAG_HEIST_GIB))
 	{
@@ -512,6 +522,7 @@ void() monster_ogre =
 
 	setsize(self, VEC_HULL2_MIN, VEC_HULL2_MAX);
 	self.health = 200;
+	self.health_max = self.health;
 
 	self.th_stand = ogre_stand1;
 	self.th_walk = ogre_walk1;
@@ -520,6 +531,9 @@ void() monster_ogre =
 	self.th_melee = ogre_melee;
 	self.th_missile = ogre_nail1;
 	self.th_pain = ogre_pain;
+
+	//NOTE - HEIST mod SPAWNFLAG
+	game_monst_set_armor();
 
 	walkmonster_start();
 };

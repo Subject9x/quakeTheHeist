@@ -224,6 +224,16 @@ void() hknight_dieb9 = [ $deathb9, hknight_dieb9 ] {};
 
 void() hknight_die =
 {
+// HORDE MODE
+	local entity this;
+
+	if(self.isHordeMob){    
+		this = self;
+		self = self.owner;
+			self.th_die();
+		self = this;	
+	}
+//=============================
 // check for gib
 	if (self.health < -40 || (self.spawnflags & SPAWNFLAG_HEIST_GIB))
 	{
@@ -461,6 +471,7 @@ void() monster_hell_knight =
 
 	setsize(self, '-16 -16 -24', '16 16 40');
 	self.health = 250;
+	self.health_max = self.health;
 
 	self.th_stand = hknight_stand1;
 	self.th_walk = hknight_walk1;
@@ -469,6 +480,9 @@ void() monster_hell_knight =
 	self.th_missile = hknight_magicc1;
 	self.th_pain = hknight_pain;
 	self.th_die = hknight_die;
+
+	//NOTE - HEIST mod SPAWNFLAG
+	game_monst_set_armor();
 
 	walkmonster_start();
 };

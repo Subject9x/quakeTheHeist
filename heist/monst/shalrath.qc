@@ -122,6 +122,16 @@ void(entity attacker, float damage) shalrath_pain =
 
 void() shalrath_die =
 {
+// HORDE MODE
+	local entity this;
+
+	if(self.isHordeMob){    
+		this = self;
+		self = self.owner;
+			self.th_die();
+		self = this;	
+	}
+//=============================
 // check for gib
 	if (self.health < -90 || (self.spawnflags & SPAWNFLAG_HEIST_GIB))
 	{
@@ -253,6 +263,7 @@ void() monster_shalrath =
 	setmodel(self, "progs/shalrath.mdl");
 	setsize(self, VEC_HULL2_MIN, VEC_HULL2_MAX);
 	self.health = 400;
+	self.health_max = self.health;
 
 	self.th_stand = shal_stand;
 	self.th_walk = shal_walk1;
@@ -260,6 +271,9 @@ void() monster_shalrath =
 	self.th_die = shalrath_die;
 	self.th_pain = shalrath_pain;
 	self.th_missile = shal_attack1;
+
+	//NOTE - HEIST mod SPAWNFLAG
+	game_monst_set_armor();
 
 	self.think = walkmonster_start;
 	self.nextthink = time + 0.1 + random()*0.1;

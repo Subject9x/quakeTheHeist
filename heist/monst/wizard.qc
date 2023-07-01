@@ -366,6 +366,16 @@ void() wiz_death8 = [ $death8, wiz_death8 ] {};
 
 void() wiz_die =
 {
+// HORDE MODE
+	local entity this;
+
+	if(self.isHordeMob){    
+		this = self;
+		self = self.owner;
+			self.th_die();
+		self = this;	
+	}
+//=============================
 // check for gib
 	if (self.health < -40 || (self.spawnflags & SPAWNFLAG_HEIST_GIB))
 	{
@@ -430,6 +440,7 @@ void() monster_wizard =
 
 	setsize(self, '-16 -16 -24', '16 16 40');
 	self.health = 80;
+	self.health_max = self.health;
 
 	self.th_stand = wiz_stand1;
 	self.th_walk = wiz_walk1;
@@ -437,6 +448,9 @@ void() monster_wizard =
 	self.th_missile = Wiz_Missile;
 	self.th_pain = Wiz_Pain;
 	self.th_die = wiz_die;
+	
+	//NOTE - HEIST mod SPAWNFLAG
+	game_monst_set_armor();
 
 	flymonster_start();
 };

@@ -210,10 +210,16 @@ void() army_fire =
 // fire somewhat behind the player, so a dodging player is harder to hit
 	en = self.enemy;
 
-	dir = en.origin - en.velocity*0.2;
-	dir = normalize(dir - self.origin);
+	//old shotgun lead-behind 
+	//dir = en.origin - en.velocity*0.2;
+	//dir = normalize(dir - self.origin);
 
-	FireBullets(4, dir, '0.1 0.1 0');
+	dir = normalize(self.enemy.origin - self.origin);
+
+	makevectors(self.angles);
+
+	//FireBullets(4, dir, '0.1 0.1 0');
+	launch_spike_bullet(self.origin + (v_forward * 8) + (v_right * 4) + (v_up * 2), dir);
 };
 
 
@@ -255,6 +261,16 @@ void() army_cdie11 = [ $deathc11, army_cdie11 ] {};
 
 void() army_die =
 {
+// HORDE MODE
+	local entity this;
+
+	if(self.isHordeMob){    
+		this = self;
+		self = self.owner;
+			self.th_die();
+		self = this;	
+	}
+//=============================
 // check for gib
 	if (self.health < -35 || (self.spawnflags & SPAWNFLAG_HEIST_GIB))
 	{
@@ -312,6 +328,7 @@ void() monster_army =
 
 	setsize(self, '-16 -16 -24', '16 16 40');
 	self.health = 30;
+	self.health_max = self.health;
 
 	self.th_stand = army_stand1;
 	self.th_walk = army_walk1;
@@ -319,6 +336,9 @@ void() monster_army =
 	self.th_missile = army_atk1;
 	self.th_pain = army_pain;
 	self.th_die = army_die;
+
+	//NOTE - HEIST mod SPAWNFLAG
+	game_monst_set_armor();
 
 	walkmonster_start();
 };

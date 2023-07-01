@@ -16,6 +16,10 @@
 	light(integer) : "Ambient light"
 	_sunlight(integer) : "Sunlight"
 	_sun_mangle(string) : "Sun mangle (Yaw pitch roll)"
+
+	//HORDE	//HORDE
+	wave_next_id(string) : "REQUIRED - tells Horde system which func_horde_wave_group is the first." : ""
+	wave_interval(float) : "REQUIRED - default time interval between horde waves." : "45.01"
 ]
 
 //
@@ -206,21 +210,31 @@
 	spawnflags(Flags) =
 	[
 		1 : "Ambush" : 0
+		4 : "Armor-Lite" : 0
+		8 : "Armor-Hvy" : 0
+	]
+]
+@baseclass = HeistArmor
+[
+	spawnflags(Flags) =
+	[
+		4 : "Armor-Lite" : 0
+		8 : "Armor-Hvy" : 0
 	]
 ]
 
-@PointClass base(Monster) size(-16 -16 -24, 16 16 40) model({ "path": ":progs/soldier.mdl" }) = monster_army : "Grunt" []
+@PointClass base(Monster, HeistArmor) size(-16 -16 -24, 16 16 40) model({ "path": ":progs/soldier.mdl" }) = monster_army : "Grunt" []
 @PointClass base(Monster) size(-32 -32 -24, 32 32 40) model({ "path": ":progs/dog.mdl" }) = monster_dog : "Nasty Doggie" []
-@PointClass base(Monster) size(-32 -32 -24, 32 32 64) model({ "path": ":progs/ogre.mdl" }) = monster_ogre : "Ogre" []
-@PointClass base(Monster) size(-32 -32 -24, 32 32 64) model({ "path": ":progs/ogre.mdl" }) = monster_ogre_marksman : "Ogre marksman" []
-@PointClass base(Monster) size(-16 -16 -24, 16 16 40) model({ "path": ":progs/knight.mdl" }) = monster_knight : "Knight" []
-@PointClass base(Monster) size(-16 -16 -24, 16 16 40) model({ "path": ":progs/hknight.mdl" }) = monster_hell_knight : "Hell knight" []
-@PointClass base(Monster) size(-16 -16 -24, 16 16 40) model({ "path": ":progs/wizard.mdl" }) = monster_wizard : "Scrag" []
-@PointClass base(Monster) size(-32 -32 -24, 32 32 64) model({ "path": ":progs/demon.mdl" }) = monster_demon1 : "Fiend" []
-@PointClass base(Monster) size(-32 -32 -24, 32 32 64) model({ "path": ":progs/shambler.mdl" }) = monster_shambler : "Shambler" []
+@PointClass base(Monster, HeistArmor) size(-32 -32 -24, 32 32 64) model({ "path": ":progs/ogre.mdl" }) = monster_ogre : "Ogre" []
+@PointClass base(Monster, HeistArmor) size(-32 -32 -24, 32 32 64) model({ "path": ":progs/ogre.mdl" }) = monster_ogre_marksman : "Ogre marksman" []
+@PointClass base(Monster, HeistArmor) size(-16 -16 -24, 16 16 40) model({ "path": ":progs/knight.mdl" }) = monster_knight : "Knight" []
+@PointClass base(Monster, HeistArmor) size(-16 -16 -24, 16 16 40) model({ "path": ":progs/hknight.mdl" }) = monster_hell_knight : "Hell knight" []
+@PointClass base(Monster, HeistArmor) size(-16 -16 -24, 16 16 40) model({ "path": ":progs/wizard.mdl" }) = monster_wizard : "Scrag" []
+@PointClass base(Monster, HeistArmor) size(-32 -32 -24, 32 32 64) model({ "path": ":progs/demon.mdl" }) = monster_demon1 : "Fiend" []
+@PointClass base(Monster, HeistArmor) size(-32 -32 -24, 32 32 64) model({ "path": ":progs/shambler.mdl" }) = monster_shambler : "Shambler" []
 @PointClass base(Monster) size(-128 -128 -24, 128 128 256) model({ "path": ":progs/boss.mdl" }) = monster_boss : "Chthon" []
-@PointClass base(Monster) size(-16 -16 -24, 16 16 40) model({ "path": ":progs/enforcer.mdl" }) = monster_enforcer : "Enforcer" []
-@PointClass base(Monster) size(-32 -32 -24, 32 32 64) model({ "path": ":progs/shalrath.mdl" }) = monster_shalrath : "Vore" []
+@PointClass base(Monster, HeistArmor) size(-16 -16 -24, 16 16 40) model({ "path": ":progs/enforcer.mdl" }) = monster_enforcer : "Enforcer" []
+@PointClass base(Monster, HeistArmor) size(-32 -32 -24, 32 32 64) model({ "path": ":progs/shalrath.mdl" }) = monster_shalrath : "Vore" []
 @PointClass base(Monster) size(-16 -16 -24, 16 16 24) model({ "path": ":progs/tarbaby.mdl" }) = monster_tarbaby : "Spawn" []
 @PointClass base(Monster) size(-16 -16 -24, 16 16 24) model({ "path": ":progs/fish.mdl" }) = monster_fish : "Rotfish" []
 @PointClass base(Monster) size(-16 -16 -24, 16 16 32) model({ "path": ":progs/oldone.mdl" }) = monster_oldone : "Shub-Niggurath" []
@@ -712,6 +726,8 @@
 
 @SolidClass base(Targetname, Target) = trigger_heist_start : "Specific trigger to begin the heist system which controls win/loss, wave-spawns, etc."
 [
+	targetname(string) : "REQUIRED" : ""
+	count(integer) : "time delay before the first wave comes in.(60)" : 60
 	spawnflags(flags) =
 	[
 		1 : "START_OFF" : 0
@@ -720,13 +736,19 @@
 	]
 ]
 
+
+//
+//	HORDE MODULAR HERE FOR CONVENIENCE
+//
 @PointClass size(-16 -16 -24, 16 16 24) color(0 255 255) = horde_mob_spawn_point : "" 
 [
-	group(string) : "REQUIRED Mob Wave group id" : "wave1"
+	wave_point_group(string) : "Mob Wave targetname" : ""
+	count(integer) : "Max mobs to spawn here before disabling the point" : -1
 ]
 
 @SolidClass base(Targetname, Target) = func_horde_wave_group : ""
 [
+	wave_next_id(string) : "REQUIRED - chaining waves together" : ""
 	group(string) : "REQUIRED - Wave group id" : "wave1"
 	wait(integer) : "OPTIONAL countdown to fire." : 0
 	wave_interval(float) : "pause-time before retriggering" : 1

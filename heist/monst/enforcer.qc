@@ -315,6 +315,16 @@ void() enf_fdie11 = [ $fdeath11, enf_fdie11 ] {};
 
 void() enf_die =
 {
+// HORDE MODE
+	local entity this;
+
+	if(self.isHordeMob){    
+		this = self;
+		self = self.owner;
+			self.th_die();
+		self = this;	
+	}
+//=============================
 // check for gib
 	if (self.health < -35 || (self.spawnflags & SPAWNFLAG_HEIST_GIB))
 	{
@@ -372,13 +382,17 @@ void() monster_enforcer =
 
 	setsize(self, '-16 -16 -24', '16 16 40');
 	self.health = 80;
-
+	self.health_max = self.health;
+	
 	self.th_stand = enf_stand1;
 	self.th_walk = enf_walk1;
 	self.th_run = enf_run1;
 	self.th_pain = enf_pain;
 	self.th_die = enf_die;
 	self.th_missile = enf_atk1;
+
+	//NOTE - HEIST mod SPAWNFLAG
+	game_monst_set_armor();
 
 	walkmonster_start();
 };

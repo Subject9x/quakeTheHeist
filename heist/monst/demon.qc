@@ -172,6 +172,19 @@ void() demon1_die9 = [ $death9, demon1_die9 ] {};
 
 void() demon_die =
 {
+
+// HORDE MODE
+	local entity this;
+
+	if(self.isHordeMob){    
+		this = self;
+		self = self.owner;
+			self.th_die();
+		self = this;	
+	}
+//=============================
+
+
 // check for gib
 	if (self.health < -80 || (self.spawnflags & SPAWNFLAG_HEIST_GIB))
 	{
@@ -227,6 +240,7 @@ void() monster_demon1 =
 
 	setsize(self, VEC_HULL2_MIN, VEC_HULL2_MAX);
 	self.health = 300;
+	self.health_max = self.health;
 
 	self.th_stand = demon1_stand1;
 	self.th_walk = demon1_walk1;
@@ -235,6 +249,9 @@ void() monster_demon1 =
 	self.th_melee = Demon_MeleeAttack; // one of two attacks
 	self.th_missile = demon1_jump1; // jump attack
 	self.th_pain = demon1_pain;
+
+	//NOTE - HEIST mod SPAWNFLAG
+	game_monst_set_armor();
 
 	walkmonster_start();
 };

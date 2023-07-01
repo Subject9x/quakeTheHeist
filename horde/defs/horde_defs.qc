@@ -14,6 +14,7 @@ void() horde_wave_manager;
 
 //wave system
 .string wave_next_id;		//find next wave entity
+.string wave_point_group;	//unique id for wave points to target.
 .entity wave_next;			//custom entity chain, set at map start.
 .float wave_interval;
 .float wave_size;
@@ -21,7 +22,9 @@ void() horde_wave_manager;
 .entity wave_point;			// entity chain for spawn points in a func_wave
 .entity wave_point_start;	// mark the chain start.
 
-
 //WARN - horde standalone will need this uncommented.
 //.float count_start;			//track initial count size of wave.
+
+.float isHordeMob;			// bool - set when mob is swept up by a func_horde_wave_group
+.vector hordeStart;			// log mob's horde start spot (useful for func_horde_wave_group)
 

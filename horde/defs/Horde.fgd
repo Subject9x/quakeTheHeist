@@ -3,13 +3,34 @@
 // extension fgd, REQUIRES base Quake.FGD
 //
 
+@SolidClass = worldspawn : "World entity"
+[
+	message(string) : "Text on entering the world"
+	worldtype(choices) : "Ambience" : 0 =
+	[
+		0 : "Medieval"
+		1 : "Metal (runic)"
+		2 : "Base"
+	]
+	sounds(integer) : "CD track to play" : 0
+	light(integer) : "Ambient light"
+	_sunlight(integer) : "Sunlight"
+	_sun_mangle(string) : "Sun mangle (Yaw pitch roll)"
+
+	//HORDE
+	wave_next_id(string) : "REQUIRED - tells Horde system which func_horde_wave_group is the first." : ""
+	wave_interval(float) : "REQUIRED - default time interval between horde waves." : "45.01"
+]
+
 @PointClass size(-16 -16 -24, 16 16 24) color(0 255 255) = horde_mob_spawn_point : "" 
 [
-	group(string) : "Mob Wave group id" : "wave1"
+	wave_point_group(string) : "Mob Wave targetname" : ""
+	count(integer) : "Max mobs to spawn here before disabling the point" : -1
 ]
 
 @SolidClass base(Targetname, Target) = func_horde_wave_group : ""
 [
+	wave_next_id(string) : "REQUIRED - chaining waves together" : ""
 	group(string) : "REQUIRED - Wave group id" : "wave1"
 	wait(integer) : "OPTIONAL countdown to fire." : 0
 	wave_interval(float) : "pause-time before retriggering" : 1

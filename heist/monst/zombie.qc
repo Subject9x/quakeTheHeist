@@ -527,6 +527,7 @@ void() monster_zombie =
 
 	setsize(self, '-16 -16 -24', '16 16 40');
 	self.health = 60;
+	self.health_max = self.health;
 
 	self.th_stand = zombie_stand1;
 	self.th_walk = zombie_walk1;

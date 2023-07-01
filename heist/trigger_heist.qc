@@ -333,37 +333,40 @@ void() trigger_heist_start_touch={
         return;
     }
 
+    if(!(other.flags & FL_CLIENT)){
+        return;
+    }
 
+    self.use();
+
+    self.solid = SOLID_NOT;
+    self.think = SUB_Remove;
+    self.nextthink = time + 0.1;
 };
 
 void() trigger_heist_start_use={
 
+    local entity this;
+
     if((self.spawnflags & SPAWNFLAG_START_OFF)){
         self.spawnflags = self.spawnflags - (self.spawnflags & SPAWNFLAG_START_OFF);
-        if((self.spawnflags & SPAWNFLAG_NOTOUCH)){
+        if(!(self.spawnflags & SPAWNFLAG_NOTOUCH)){
             self.touch = trigger_heist_start_touch;
         }
         return;
     }
-
-
-    self.think = trigger_heist_start_init;
-    self.nextthink = time + self.count;
-};
-
-//map-load delay to make sure map-entiies spawned in.
-void() trigger_heist_start_load={
-
-    local entity t;
-
-    t = find(world, wave_next_id, self.wave_next_id);
-    if(!t){
+    if(!HORDE_MANAGER){
         objerror("trigger_heist_start couldn't find first wave entity!\n");
         remove(self);
         return;
     }
 
-    self.wave_next = t;
+    this = self;
+    self = HORDE_MANAGER;
+        logStr("trigger_heist_start_use", "START HORDE MANAGER");   //debug
+        self.think = self.use;
+        self.nextthink = time + 0.51;
+    self = this;
 };
 /*
     Begins wave-spawning system timer
@@ -378,19 +381,14 @@ void()  trigger_heist_start={
         return;
     }
 
-    if(!self.wave_next_id || self.wave_next_id == ""){
-        objerror("trigger_heist_start missing wave_next_id.\n");
-        remove(self);
-        return;
-    }
-
     if(!self.count){
         self.count = 60;    //default 60 delay
     }
 
-
     self.use = trigger_heist_start_use;
-    self.think = trigger_heist_start_load;
-    self.nextthink = time + 3;
+
+    if(!(self.spawnflags & SPAWNFLAG_NOTOUCH)){
+        self.touch = trigger_heist_start_touch;
+    }
 };
 

@@ -493,3 +493,7 @@ void(float mdlId, vector dir) ThrowHeistItemGib={
 	self.nextthink = time + 0.001;
 
 };
+
+/*
+	ITEM EXTENSIONS / CUSTOM
+*/

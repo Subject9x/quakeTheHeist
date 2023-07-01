@@ -7,6 +7,9 @@
 #define SPAWNFLAG_REMOVE_HEIST_ITM 8
 #define SPAWNFLAG_MDL_RAND 1
 
+#define SPAWNFLAG_MONST_ARMR_L 4
+#define SPAWNFLAG_MONST_ARMR_H 8
+
 #define SPAWNFLAG_KILL_ON_DONE 8
 #define SPAWNFLAG_REMOVE_DONE 16
 
@@ -189,4 +192,24 @@ float(vector pos, vector neg) math_brush_radius={
 	v = (x + y) / 2;
 
 	return v;
+};
+
+void() game_monst_set_armor={
+	
+	float type, value, bit;
+	if ((self.spawnflags & SPAWNFLAG_MONST_ARMR_L))
+	{
+		type = 0.6;
+		value = 150;
+		bit = IT_ARMOR2;
+	}
+	if ((self.spawnflags & SPAWNFLAG_MONST_ARMR_H))
+	{
+		type = 0.8;
+		value = 200;
+		bit = IT_ARMOR3;
+	}
+	self.armortype = type;
+	self.armorvalue = value;
+	self.items = self.items - (self.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)) + bit;
 };

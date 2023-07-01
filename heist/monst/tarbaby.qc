@@ -186,6 +186,19 @@ void() tbaby_jump6 = [ $jump6, tbaby_fly1 ] {};
 void() tbaby_die1 = [ $exp, tbaby_die2 ] { self.takedamage = DAMAGE_NO; };
 void() tbaby_die2 = [ $exp, tbaby_run1 ]
 {
+
+
+// HORDE MODE
+local entity this;
+
+if(self.isHordeMob){    
+	this = self;
+	self = self.owner;
+		self.th_die();
+	self = this;	
+}
+//=============================
+
 	T_RadiusDamage(self, self, 120, world);
 
 	sound(self, CHAN_VOICE, "blob/death1.wav", 1, ATTN_NORM);
@@ -226,6 +239,7 @@ void() monster_tarbaby =
 
 	setsize(self, '-16 -16 -24', '16 16 40');
 	self.health = 80;
+	self.health_max = self.health;
 
 	self.th_stand = tbaby_stand1;
 	self.th_walk = tbaby_walk1;

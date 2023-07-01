@@ -635,7 +635,33 @@ void(vector org, vector dir) launch_spike =
 	setorigin(newmis, org);
 
 	newmis.velocity = dir * 1000;
+
 };
+
+/*
+	Heist Mod
+*/
+void(vector org, vector dir) launch_spike_bullet =
+{
+	newmis = spawn();
+	newmis.owner = self;
+	newmis.movetype = MOVETYPE_FLYMISSILE;
+	newmis.solid = SOLID_BBOX;
+
+	newmis.angles = vectoangles(dir);
+
+	newmis.touch = spike_touch;
+	newmis.classname = "spike";
+	newmis.think = SUB_Remove;
+	newmis.nextthink = time + 6;
+	setmodel(newmis, "progs/spike.mdl");
+	setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
+	setorigin(newmis, org);
+
+	newmis.velocity = dir * 800;
+	newmis.weapon_dmg = 5;
+};
+//===============================================
 
 void() W_FireSuperSpikes =
 {
@@ -647,6 +673,7 @@ void() W_FireSuperSpikes =
 	dir = aim(self, 1000);
 	launch_spike(self.origin + '0 0 16', dir);
 	newmis.touch = superspike_touch;
+	newmis.weapon_dmg = 13;
 	setmodel(newmis, "progs/s_spike.mdl");
 	setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
 	self.punchangle_x = -2;
@@ -676,6 +703,7 @@ void(float ox) W_FireSpikes =
 	self.currentammo = self.ammo_nails = self.ammo_nails - 1;
 	dir = aim(self, 1000);
 	launch_spike(self.origin + '0 0 16' + v_right*ox, dir);
+	newmis.weapon_dmg = 9;
 
 	self.punchangle_x = -2;
 };

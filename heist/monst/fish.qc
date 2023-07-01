@@ -130,6 +130,16 @@ void() f_attack18 = [ $attack18, f_run1 ] { ai_charge(10); };
 
 void() f_death1 = [ $death1, f_death2 ]
 {
+// HORDE MODE
+	local entity this;
+
+	if(self.isHordeMob){    
+		this = self;
+		self = self.owner;
+			self.th_die();
+		self = this;	
+	}
+//=============================
 	sound(self, CHAN_VOICE, "fish/death.wav", 1, ATTN_NORM);
 
 	if((self.spawnflags & SPAWNFLAG_HEIST_GIB)){
@@ -198,6 +208,7 @@ void() monster_fish =
 
 	setsize(self, '-16 -16 -24', '16 16 24');
 	self.health = 25;
+	self.health_max = self.health;
 
 	self.th_stand = f_stand1;
 	self.th_walk = f_walk1;

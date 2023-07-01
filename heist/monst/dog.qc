@@ -252,6 +252,16 @@ void() dog_dieb9 = [ $deathb9, dog_dieb9 ] {};
 
 void() dog_die =
 {
+// HORDE MODE
+	local entity this;
+
+	if(self.isHordeMob){    
+		this = self;
+		self = self.owner;
+			self.th_die();
+		self = this;	
+	}
+//=============================
 // check for gib
 	if (self.health < -35)
 	{
@@ -372,6 +382,7 @@ void() monster_dog =
 
 	setsize(self, '-32 -32 -24', '32 32 40');
 	self.health = 25;
+	self.health_max = self.health;
 
 	self.th_stand = dog_stand1;
 	self.th_walk = dog_walk1;
