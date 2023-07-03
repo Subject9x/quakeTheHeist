@@ -30,7 +30,7 @@ void() horde_wave_manager={
     self = HORDE_MANAGER;
         self.attack_state = FUNC_WAVE_STATE_INIT;
         self.think = horde_wave_manager_init;
-        self.nextthink = time + 3.001;
+        self.nextthink = time + 10;
     self = this;
 };
 
@@ -52,16 +52,18 @@ void() horde_wave_manager_init={
     //NOTE - DP/FTE can just do findchain();
     self.wave_next = firstWave;
     self.count = 1;
-    hordeWave = self.wave_next;
+    hordeWave = firstWave;
     
-    while(hordeWave){
-        nextWave = find(hordeWave, wave_next_id, hordeWave.wave_next_id);
-        if(nextWave){
+    while((hordeWave != world)){
+        nextWave = find(world, targetname, hordeWave.wave_next_id);
+        if(nextWave && nextWave.classname == "func_horde_wave_group"){
             hordeWave.wave_next = nextWave;
-            logStr("loaded hordeWave", hordeWave.targetname);   //debug
             self.count = self.count + 1;
+            hordeWave = nextWave;
         }
-        hordeWave = nextWave;
+        else{
+            hordeWave = world;
+        }
     }
 
     self.use = horde_wave_manager_use;
@@ -77,24 +79,33 @@ void() horde_wave_manager_init={
 
 void() horde_wave_manager_use={
     //TODO - VA event
-    logStr("HORDE MANAGER", "USE ");   //debug
+    //logStr("HORDE MANAGER", "USE ");   //debug
     if(self.wave_next){
-        logStr("HORDE MANAGER- USE()", self.wave_next.targetname);   //debug
+        //logStr("HORDE MANAGER- USE()", self.wave_next.targetname);   //debug
         self.attack_state = FUNC_WAVE_STATE_RUN;
         self.wave_next.think = self.wave_next.use;
         self.wave_next.nextthink = time + 1;
     }
 };
 void() horde_wave_manager_next_wave={
+    //logStr("HORDE MANAGER- horde_wave_manager_next_wave()", "exec");   //debug
+
     //TODO - VA event
     if(self.wave_next.wave_next){
-        logStr("HORDE MANAGER- NEXT_WAVE()", self.wave_next.targetname);   //debug
+        self.count = self.count + 1;
         self.wave_next = self.wave_next.wave_next;
         self.attack_state = FUNC_WAVE_STATE_RUN;
         self.wave_next.think = self.wave_next.use;
         self.wave_next.nextthink = time + self.wave_interval;
+
+       // logStr("HORDE MANAGER- NEXT_WAVE()", self.wave_next.targetname);   //debug
     }
-}
+    else{
+       // logStr("HORDE MANAGER- WAVES COMPLETE", "FUNC_WAVE_STATE_DONE");   //debug
+        self.attack_state = FUNC_WAVE_STATE_DONE;
+        self.nextthink = -1;
+    }
+};
 
 //=====================================================
 void() horde_wave_group_init;
@@ -161,8 +172,8 @@ void() horde_wave_group_init={
         mob = mob.chain;
     }
     if(!self.wave_mob){
-        objerror("\nfailed to find any mobs in trigger area!\nradius:");
-        dprint(ftos(math_brush_radius(self.absmax, self.absmin))); 
+        objerror("\nfailed to find any mobs in trigger area!\n");
+        logFloat("radius", math_brush_radius(self.absmax, self.absmin));   //debug
         logVec("origin", v);    //debug
 
         remove(self);
@@ -257,8 +268,8 @@ void() horde_wave_group_spawn={
         if((self.spawnflags & SPAWNFLAG_HORDE_GROUP_VFX_TELE)){
             spawn_tfog(point.origin);
         }
-        
-        setorigin(mob, point.origin);
+        makevectors(self.angles);
+        setorigin(mob, point.origin + (v_forward * mob.maxs_x));
         mob.angles = point.angles;
 
         force_retouch = 2;

@@ -12,10 +12,10 @@ horde/defs/horde_defs.qc
 subs.qc
 fight.qc
 ai.qc
-heist/combat.qc
-items.qc
 
 // HEIST MOD
+heist/combat.qc
+heist/items.qc
 heist/weapons.qc
 //===========================
 

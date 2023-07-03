@@ -264,7 +264,7 @@ void() army_die =
 // HORDE MODE
 	local entity this;
 
-	if(self.isHordeMob){    
+	if(self.isHordeMob){
 		this = self;
 		self = self.owner;
 			self.th_die();

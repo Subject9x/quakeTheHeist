@@ -1078,16 +1078,24 @@ void() PlayerPostThink =
 		self.jump_flag = 0;
 	}
 
+	/*
+		Heist mod - carrying items affects movement
+	*/
 	if ((self.flags & FL_ONGROUND)){
 		if(self.velocity){
+			encumber = 0.0;
 			if(self.inv_item_heist){
 				encumber = self.inv_item_heist.inv_item_throw_wt;
 				if(encumber >= 1.0){
 					encumber = 0.0;
 				}
-				encumber = encumber / 2 * 50;
-				self.velocity = self.velocity - (self.velocity * encumber * frametime);
 			}
+			encumber = ((encumber / 2) + self.inv_armor_wt) ;
+			if((self.items & IT_SUIT)){
+				encumber = encumber * 0.5;
+			}
+			encumber = encumber * 50;
+			self.velocity = self.velocity - (self.velocity * encumber * frametime);
 		}
 	}
 	else{

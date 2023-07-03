@@ -472,6 +472,15 @@ void() item_heist_gib={
 
 void(float mdlId, vector dir) ThrowHeistItemGib={
 
+	local entity gib;
+	local entity this;
+
+	if((self.isHordeMob)){
+		this = self;
+		gib = spawn();
+		self = gib;
+	}
+
 	self.classname = "item_heist_gib";
 	item_heist_gib_spawn(mdlId);
 
@@ -491,6 +500,10 @@ void(float mdlId, vector dir) ThrowHeistItemGib={
 	self.tempDir = dir;
 	self.think = self.throw;
 	self.nextthink = time + 0.001;
+	
+	if((self.isHordeMob)){
+		self = this;
+	}
 
 };
 
