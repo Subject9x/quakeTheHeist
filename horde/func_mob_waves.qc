@@ -246,6 +246,7 @@ void() horde_wave_group_spawn={
     local entity mob;
     local entity point;
     local entity clientTarg;
+    local entity this;
 
     if(self.count < 0){
         dprint("horde_wave_group_spawn complete!\n");
@@ -288,9 +289,11 @@ void() horde_wave_group_spawn={
         if(ENT_CLIENT4 || (ENT_CLIENT4.flags & FL_HEIST_ITEM)){
             clientTarg = ENT_CLIENT4;
         }
-        mob.enemy = clientTarg;
-        mob.think = mob.th_run;
-        mob.nextthink = time + 0.1;
+        this = self;
+        self = mob;
+            self.enemy = clientTarg;
+            FoundTarget();
+        self = this;
 
         self.wave_mob = self.wave_mob.wave_mob;
         if(self.wave_point.wave_point){

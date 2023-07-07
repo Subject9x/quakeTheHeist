@@ -1123,24 +1123,28 @@ void() ClientConnect =
 		return;
 	}
 
-	if(!ENT_CLIENT1){
+	if(ENT_CLIENT1 == world){
 		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL + 1;
 		ENT_CLIENT1 = self;
+		logFloat("ENT_CLIENT1", CLIENT_ACTIVE_TOTAL);	//debug
 		return;
 	}
-	if(!ENT_CLIENT2){
+	if(ENT_CLIENT2 == world){
 		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL + 1;
 		ENT_CLIENT2 = self;
+		logFloat("ENT_CLIENT2", CLIENT_ACTIVE_TOTAL);	//debug
 		return;
 	}
-	if(!ENT_CLIENT3){
+	if(ENT_CLIENT3 == world){
 		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL + 1;
 		ENT_CLIENT3 = self;
+		logFloat("ENT_CLIENT3", CLIENT_ACTIVE_TOTAL);	//debug
 		return;
 	}
-	if(!ENT_CLIENT4){
+	if(ENT_CLIENT4 == world){
 		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL + 1;
 		ENT_CLIENT4 = self;
+		logFloat("ENT_CLIENT4", CLIENT_ACTIVE_TOTAL);	//debug
 	}
 };
 

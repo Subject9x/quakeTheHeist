@@ -212,6 +212,16 @@ void(entity targ, entity inflictor, entity attacker, float damage) T_Damage=
 		}
 	}
 */
+	if ((self.flags & FL_MONSTER) && attacker != world)
+	{
+		if (self != attacker && attacker != self.enemy)
+		{
+			if(attacker.classname == "player"){
+				self.enemy = attacker;
+				FoundTarget();
+			}
+		}
+	}
 	if (self.th_pain)
 	{
 		//simulate 'armor' on mobs per-se, only start painin' when health gets below 67%
