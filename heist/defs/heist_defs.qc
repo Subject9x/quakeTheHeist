@@ -44,6 +44,13 @@
 #define CL_IMPULSE_ITEM_THROW 16
 #define CL_IMPULSE_CLIENT_USE 17	//compatibility for vanilla
 
+#define CL_STATE_CONN 1
+#define CL_STATE_RESPN 2
+
+float MUSIC_ACTION;
+float MUSIC_MOOD;
+float MUSIC_WAIT;
+
 .float ent_mdl_idx;
 .string group;
 .float isMapObj;	// detect if entity is spawned by map vs dynamic
@@ -76,6 +83,11 @@
 
 .float health_max;	
 
+.float music_mood;
+.float music_action;
+.float music_wait;
+
+.float client_state;
 float CLIENT_ACTIVE_TOTAL;
 entity ENT_CLIENT1;
 entity ENT_CLIENT2;

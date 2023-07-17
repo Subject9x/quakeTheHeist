@@ -61,3 +61,7 @@ heist/monst/fish.qc			// registered
 heist/monst/shalrath.qc		// registered
 heist/monst/enforcer.qc		// registered
 heist/monst/oldone.qc		// registered
+
+//HORDE MOD
+horde/mob_funcs.qc
+//============================

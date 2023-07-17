@@ -27,6 +27,8 @@ void(vector org, entity death_owner) spawn_tdeath;
 
 float modelindex_eyes, modelindex_player;
 
+void(entity e) heist_core_music_send;
+
 /*
 =============================================================================
 
@@ -356,6 +358,7 @@ void() set_suicide_frame;
 // called by ClientKill and DeadThink
 void() respawn =
 {
+	self.client_state = CL_STATE_RESPN;
 	if (coop)
 	{
 		// make a copy of the dead body for appearances sake
@@ -526,6 +529,11 @@ void() PutClientInServer =
 	//NOTE - heist mod
 	self.inv_item_heist = world;
 	self.flags = self.flags - (self.flags & FL_HEIST_ITEM);
+
+	if(self.client_state == CL_STATE_CONN)
+	{
+		heist_core_music_send(self);
+	}
 };
 
 
@@ -1123,29 +1131,28 @@ void() ClientConnect =
 		return;
 	}
 
+	self.client_state = CL_STATE_CONN;
 	if(ENT_CLIENT1 == world){
 		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL + 1;
 		ENT_CLIENT1 = self;
-		logFloat("ENT_CLIENT1", CLIENT_ACTIVE_TOTAL);	//debug
 		return;
 	}
 	if(ENT_CLIENT2 == world){
 		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL + 1;
 		ENT_CLIENT2 = self;
-		logFloat("ENT_CLIENT2", CLIENT_ACTIVE_TOTAL);	//debug
 		return;
 	}
 	if(ENT_CLIENT3 == world){
 		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL + 1;
 		ENT_CLIENT3 = self;
-		logFloat("ENT_CLIENT3", CLIENT_ACTIVE_TOTAL);	//debug
 		return;
 	}
 	if(ENT_CLIENT4 == world){
 		CLIENT_ACTIVE_TOTAL = CLIENT_ACTIVE_TOTAL + 1;
 		ENT_CLIENT4 = self;
-		logFloat("ENT_CLIENT4", CLIENT_ACTIVE_TOTAL);	//debug
 	}
+
+
 };
 
 

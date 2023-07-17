@@ -9,6 +9,13 @@
 
 */
 
+entity(float mobId) mob_generate;   //include reference
+float() mob_spawn_next;
+
+void() wavemonster_start;
+void() wavemonster_flystart;
+
+void() heist_core_music_loud;
 
 /*
     server entry-point to wave manager
@@ -44,7 +51,7 @@ void() horde_wave_manager_init={
 
     if(!firstWave){
         logStr("ERROR(HORDE_MANAGER)", world.wave_next_id);
-        objerror("failed to find first func_horde_wave_group by id!\n");
+        objerror("failed to find first horde_wave_group by id!\n");
         return;
     }
 
@@ -56,7 +63,7 @@ void() horde_wave_manager_init={
     
     while((hordeWave != world)){
         nextWave = find(world, targetname, hordeWave.wave_next_id);
-        if(nextWave && nextWave.classname == "func_horde_wave_group"){
+        if(nextWave && nextWave.classname == "horde_wave_group"){
             hordeWave.wave_next = nextWave;
             self.count = self.count + 1;
             hordeWave = nextWave;
@@ -81,10 +88,12 @@ void() horde_wave_manager_use={
     //TODO - VA event
     //logStr("HORDE MANAGER", "USE ");   //debug
     if(self.wave_next){
+        heist_core_music_loud();
         //logStr("HORDE MANAGER- USE()", self.wave_next.targetname);   //debug
         self.attack_state = FUNC_WAVE_STATE_RUN;
         self.wave_next.think = self.wave_next.use;
         self.wave_next.nextthink = time + 1;
+
     }
 };
 void() horde_wave_manager_next_wave={
@@ -118,64 +127,102 @@ void() hord_wave_group_mob_dead;
     Mobs are linked together as the basis of the wave.
 
 */
-void() func_horde_wave_group={
+void() horde_wave_group={
 
     InitTrigger();
 
-    if(!self.targetname || self.targetname == ""){
+    if(!self.targetname || self.targetname == "")
+    {
         objerror("missing targetname, needed for use.");
         remove(self);
         return;
     }
 
-    if(!self.wave_interval){
+    if(!self.wave_interval)
+    {
         self.wave_interval = 1;
     }
 
-    if(!self.wait){
+    if(!self.wait)
+    {
         self.wait = 1;
     }
 
     self.attack_state = FUNC_WAVE_STATE_INIT;
     self.use = horde_wave_group_use;
     self.think = horde_wave_group_init;
-    self.nextthink = time + 10.01;
+    self.nextthink = time + 5.001;
 };
 
 //scan area of brush for any mobs being contained in it.
 void() horde_wave_group_init={
 
-    local entity mob;
-    local vector v;
-    local entity link;
+    local float totes;
 
-    local entity point;
+    totes = 0;
 
-    self.owner = HORDE_MANAGER;
+    totes = totes + self.mob_fish;
+    totes = totes + self.mob_dog;
+    totes = totes + self.mob_army;
+    totes = totes + self.mob_enforcer;
+    totes = totes + self.mob_knight;
+    totes = totes + self.mob_ogre;
+    totes = totes + self.mob_fiend;
+    totes = totes + self.mob_hellknight;
+    totes = totes + self.mob_wizard;
+    totes = totes + self.mob_vore;
+    totes = totes + self.mob_shambler;
+    totes = totes + self.mob_zombie;
+    totes = totes + self.mob_tarbb;
 
-    v = math_brush_origin(self);
-    
-    mob = findradius(v, math_brush_radius(self.absmax, self.absmin));
-    link = self;
-    while(mob){
-        if(math_point_in_area(mob.origin, self.absmax, self.absmin)){
-            mob.hordeStart = mob.origin;    //cache map-set start org.
-            mob.isHordeMob = TRUE; //mark as horde mob.
-            mob.nextthink = -1; //pause the mob
-
-            mob.owner = self;
-            self.count = self.count + 1;
-            
-            link.wave_mob = mob;
-            link = mob;
-        }
-        mob = mob.chain;
+    if(self.mob_fish){
+        self.wave_mobs = self.wave_mobs | MOB_ID_FISH;
     }
-    if(!self.wave_mob){
-        objerror("\nfailed to find any mobs in trigger area!\n");
-        logFloat("radius", math_brush_radius(self.absmax, self.absmin));   //debug
-        logVec("origin", v);    //debug
+    if(self.mob_dog){
+        self.wave_mobs = self.wave_mobs | MOB_ID_DOG;
+    }
+    if(self.mob_army){
+        self.wave_mobs = self.wave_mobs | MOB_ID_ARMY;
+    }
+    if(self.mob_enforcer){
+        self.wave_mobs = self.wave_mobs | MOB_ID_ENFRCE;
+    }
+    if(self.mob_knight){
+        self.wave_mobs = self.wave_mobs | MOB_ID_KNIGHT;
+    }
+    if(self.mob_ogre){
+        self.wave_mobs = self.wave_mobs | MOB_ID_OGRE;
+    }
+    if(self.mob_fiend){
+        self.wave_mobs = self.wave_mobs | MOB_ID_FIEND;
+    }
+    if(self.mob_hellknight){
+        self.wave_mobs = self.wave_mobs | MOB_ID_HKNIGHT;
+    }
+    if(self.mob_wizard){
+        self.wave_mobs = self.wave_mobs | MOB_ID_WIZRD;
+    }
+    if(self.mob_vore){
+        self.wave_mobs = self.wave_mobs | MOB_ID_VORE;
+    }
+    if(self.mob_shambler){
+        self.wave_mobs = self.wave_mobs | MOB_ID_SHMBL;
+    }
+    if(self.mob_zombie){
+        self.wave_mobs = self.wave_mobs | MOB_ID_ZMBIE;
+    }
+    if(self.mob_tarbb){
+        self.wave_mobs = self.wave_mobs | MOB_ID_TARBB;
+    }
 
+    self.spawnflags = self.spawnflags | SPAWNFLAG_HORDE_GRP_ORD_SIZE;
+    if((self.spawnflags & SPAWNFLAG_HORDE_GRP_ORD_RAND) || (self.spawnflags & SPAWNFLAG_HORDE_GRP_ORD_RVSIZE))
+    {
+        self.spawnflags = self.spawnflags - (self.spawnflags & SPAWNFLAG_HORDE_GRP_ORD_SIZE);
+    }
+
+    if(totes <= 0){
+        objerror("you forgot to add any mobs to this group!?\n");
         remove(self);
         return;
     }
@@ -191,8 +238,10 @@ void() horde_wave_group_init={
         }
     }
 
+    self.owner = HORDE_MANAGER;
     self.attack_state = FUNC_WAVE_STATE_READY;
-    self.count_start = self.count;
+    self.count_start = totes;
+    self.count = self.count_start;
     self.wave_size = self.count_start;
     self.th_die = hord_wave_group_mob_dead;
 };
@@ -212,21 +261,20 @@ void() hord_wave_group_mob_dead={
 };
 void() horde_wave_group_use={
 
-    if(self.attack_state != FUNC_WAVE_STATE_READY){
+    if(self.attack_state != FUNC_WAVE_STATE_READY)
+    {
         dprint("\n self.attack_state != FUNC_WAVE_STATE_READY \n");
         return;
     }
 
-    if(self.attack_state == FUNC_WAVE_STATE_READY){
+    if(self.attack_state == FUNC_WAVE_STATE_READY)
+    {
         //detects "first-time use"
         //TODO - EVENT -> VA ""
-        if(self.owner.count == 1){
+        if(self.owner.count == 1)
             bprint("\n there goes the alarm! we got creeps comin'!\n");
-        }
-        else{
+        else
             bprint("\n Get Ready, more mobs comin'!\n");
-        }
-
     }
     self.attack_state = FUNC_WAVE_STATE_RUN;
 
@@ -243,12 +291,14 @@ void() horde_wave_group_spawn_pause={
 
 void() horde_wave_group_spawn={
 
+    local float mobId;
     local entity mob;
     local entity point;
     local entity clientTarg;
     local entity this;
 
-    if(self.count < 0){
+    if(self.count < 1)
+    {
         dprint("horde_wave_group_spawn complete!\n");
         self.attack_state = FUNC_WAVE_STATE_DONE;
         self.nextthink = -1;
@@ -256,27 +306,48 @@ void() horde_wave_group_spawn={
         return;
     }
 
-    if(self.count == self.count_start){
-        //TODO - EVENT - VA "Here we go, more fuzz!"
-         bprint("\n Here we go, more fuzz!\n");
+    //TODO - EVENT - VA "Here we go, more fuzz!"
+    if(self.count == self.count_start)
+    {
+        bprint("\n Here we go, more fuzz!\n");
     }
+        
     
     point = self.wave_point;
-    if(self.wave_mob){
-        mob = self.wave_mob;
-        mob.flags = mob.flags - (mob.flags & FL_ONGROUND);
-        
-        if((self.spawnflags & SPAWNFLAG_HORDE_GROUP_VFX_TELE)){
+
+    mobId = mob_spawn_next();
+
+    if(mobId == -1)
+    {
+        logStr("horde_wave_group_spawn", "trying spawn again.");    //debug
+        logFloat("count left", self.count); //debug
+        self.think = horde_wave_group_spawn;
+        self.nextthink = time + 0.01;   //trying again.
+        return;
+    }
+
+    mob = mob_generate(mobId);
+
+    if(!mob && self.count > 0)
+    {
+        logStr("horde_wave_group_spawn", "trying spawn again.");    //debug
+        logFloat("count left", self.count); //debug
+        self.think = horde_wave_group_spawn;
+        self.nextthink = time + 0.01;   //trying again.
+        return;
+    }
+
+    if(mob)
+    {
+        mob.owner = self;
+        if((self.spawnflags & SPAWNFLAG_HORDE_GROUP_VFX_TELE))
+        {
             spawn_tfog(point.origin);
         }
-        makevectors(self.angles);
-        setorigin(mob, point.origin + (v_forward * mob.maxs_x));
+        makevectors(self.wave_point.angles);
+        setorigin(mob, point.origin + (v_forward * mob.maxs_x) + '0 0 2');
         mob.angles = point.angles;
-
-        force_retouch = 2;
-
-        //TODO - bad fly-monster patch
-
+        
         if(ENT_CLIENT1 || (ENT_CLIENT1.flags & FL_HEIST_ITEM)){
             clientTarg = ENT_CLIENT1;
         }
@@ -289,22 +360,35 @@ void() horde_wave_group_spawn={
         if(ENT_CLIENT4 || (ENT_CLIENT4.flags & FL_HEIST_ITEM)){
             clientTarg = ENT_CLIENT4;
         }
+        
         this = self;
         self = mob;
+            force_retouch = 2;
+            droptofloor();
+            if(self.classname == "monster_wizard")
+            {
+                wavemonster_flystart();
+            }
+            else
+            {
+                wavemonster_start();
+            }
             self.enemy = clientTarg;
             FoundTarget();
         self = this;
 
-        self.wave_mob = self.wave_mob.wave_mob;
-        if(self.wave_point.wave_point){
+        if(self.wave_point.wave_point)
+        {
             self.wave_point = self.wave_point.wave_point;
         }
-        else{
+        else
+        {
             self.wave_point = self.wave_point_start;
         }
         
     }
-    else{
+    else
+    {
         dprint("horde_wave_group_spawn no more mobs!\n");
         self.attack_state = FUNC_WAVE_STATE_DONE;
         self.nextthink = -1;
@@ -353,8 +437,8 @@ void() th_horde_mob_spawn_init={
         return;
     }
 
-    if(funcWave.classname != "func_horde_wave_group"){
-        objerror("missing parent wasn't a func_horde_wave_group!\n");
+    if(funcWave.classname != "horde_wave_group"){
+        objerror("missing parent wasn't a horde_wave_group!\n");
         remove(self);
         return;
     }

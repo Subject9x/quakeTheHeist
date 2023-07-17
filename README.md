@@ -9,10 +9,11 @@ just a 'small mod' kind of project for QuakeC, the idea is to incorporate heist 
 ### features
 + 'Heist' items - when carried they reduce player speed and take player weapon away.
 + throwable items - items can be picked up / put down.
-+ new monster flags and triggers to react to things being stolen.
++ Horde waves - mobs can be setup by mappers to be spawned in timed waves.
++ new monster flags and triggers to react to things being stolen. (TODO)
 + new map triggers to support 'heist-style' maps.
-+ time-gate intereactions - 'hold-button-down'
-+ limited HUD changes just to support mechanics.
++ time-gate intereactions - 'hold-button-down' (TODO)
++ limited HUD changes just to support mechanics. (TODO)
 
 that's about it, the mantra is 'lightweight' so that modders can easily bring the fun into their own projects.
 

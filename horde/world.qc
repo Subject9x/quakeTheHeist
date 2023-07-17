@@ -23,6 +23,8 @@
 */
 void() InitBodyQue;
 
+void() precache_mobs;	//include from Horde Mod
+void() heist_core_music_ini; //include from Heist Mod
 
 void() main =
 {
@@ -313,6 +315,12 @@ void() worldspawn =
 	precache_model("progs/zom_gib.mdl");
 
 	precache_model("progs/v_light.mdl");
+
+//HEIST MOD
+	heist_core_music_ini();
+
+//HORDE MODE----------------------------------------------------
+	precache_mobs();
 
 
 //

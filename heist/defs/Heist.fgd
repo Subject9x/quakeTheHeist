@@ -13,12 +13,15 @@
 		2 : "Base"
 	]
 	sounds(integer) : "CD track to play" : 0
+	music_mood(integer) : "(OPTIONAL) CD track for moody part" : 0
+	music_action(integer) : "(OPTIONAL) CD track for going loud" : 0
+	music_wait(integer) : "(OPTIONAL) CD track in-between waves" : 0
 	light(integer) : "Ambient light"
 	_sunlight(integer) : "Sunlight"
 	_sun_mangle(string) : "Sun mangle (Yaw pitch roll)"
 
 	//HORDE	//HORDE
-	wave_next_id(string) : "REQUIRED - tells Horde system which func_horde_wave_group is the first." : ""
+	wave_next_id(string) : "REQUIRED - tells Horde system which horde_wave_group is the first." : ""
 	wave_interval(float) : "REQUIRED - default time interval between horde waves." : "45.01"
 ]
 
@@ -626,7 +629,7 @@
 @PointClass base(Targetname, Target) size(-16 -16 -24, 16 16 24) color(0 255 255)= heist_endzone : "Heist Endzone"
 [
 	spawnflags(flags) = [ 1: "START_OFF" : 0]
-	trig_radius(float) : "radius to count players" : 64.0
+	trig_radius(float) : "radius to count players" : "64.0"
 ]
 
 @baseclass base(Targetname) color(137 185 203) size(-8 -8 -8, 8 8 8) = HeistItem
@@ -740,20 +743,36 @@
 //
 //	HORDE MODULAR HERE FOR CONVENIENCE
 //
-@PointClass size(-16 -16 -24, 16 16 24) color(0 255 255) = horde_mob_spawn_point : "" 
+@PointClass size(-32 -32 -24, 32 32 64) color(0 255 255) = horde_mob_spawn_point : "" 
 [
 	wave_point_group(string) : "Mob Wave targetname" : ""
 	count(integer) : "Max mobs to spawn here before disabling the point" : -1
 ]
 
-@SolidClass base(Targetname, Target) = func_horde_wave_group : ""
+@PointClass base(Targetname, Target) size(16 16 16) color(0 255 255)= horde_wave_group : ""
 [
 	wave_next_id(string) : "REQUIRED - chaining waves together" : ""
 	group(string) : "REQUIRED - Wave group id" : "wave1"
 	wait(integer) : "OPTIONAL countdown to fire." : 0
-	wave_interval(float) : "pause-time before retriggering" : 1
+	wave_interval(float) : "pause-time before retriggering" : "1.0"
 	targetname(string) : "REQUIRED - unique targetname" : "wave1"
 	spawnflags(flags) = [
 		1 : "VFX_TELEPORT" : 0
+		16 : "Order by size" : 1
+		32 : "Order by reverse size" : 0
+		64 : "Random order" : 0
 	]
+	mob_fish(integer) : "# to make" : 0
+	mob_dog(integer) : "# to make" : 0
+	mob_army(integer) : "# to make" : 0
+	mob_enforcer(integer) : "# to make" : 0
+	mob_knight(integer) : "# to make" : 0
+	mob_ogre(integer) : "# to make" : 0
+	mob_fiend(integer) : "# to make" : 0
+	mob_hellknight(integer) : "# to make" : 0
+	mob_wizard(integer) : "# to make" : 0
+	mob_vore(integer) : "# to make" : 0
+	mob_shambler(integer) : "# to make" : 0
+	mob_zombie(integer) : "# to make" : 0
+	mob_tarbb(integer) : "# to make" : 0
 ]
