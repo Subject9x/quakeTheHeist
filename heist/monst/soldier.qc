@@ -61,6 +61,9 @@ SOLDIER CODE
 ==============================================================================
 */
 
+//Heist - doubled because shells are shared between rifle (old shotgun) and super shotty, which have new consumption  rates.
+#define AMMO_DROP_SHELLS 12	// 4 Super shots, 16 rifle shots
+
 void() army_fire;
 
 void() army_stand1 = [ $stand1, army_stand2 ] { ai_stand(); };
@@ -219,7 +222,7 @@ void() army_fire =
 	makevectors(self.angles);
 
 	//FireBullets(4, dir, '0.1 0.1 0');
-	launch_spike_bullet(self.origin + (v_forward * 8) + (v_right * 4) + (v_up * 2), dir);
+	launch_spike_bullet(self.origin + (v_forward * 8) + (v_right * 4) + (v_up * 2), dir, 700, 5);
 };
 
 
@@ -229,7 +232,7 @@ void() army_die2 = [ $death2, army_die3 ] {};
 void() army_die3 = [ $death3, army_die4 ]
 {
 	self.solid = SOLID_NOT;
-	self.ammo_shells = 5;
+	self.ammo_shells = AMMO_DROP_SHELLS;
 	DropBackpack();
 };
 void() army_die4 = [ $death4, army_die5 ] {};
@@ -245,7 +248,7 @@ void() army_cdie2 = [ $deathc2, army_cdie3 ] { ai_back(5); };
 void() army_cdie3 = [ $deathc3, army_cdie4 ]
 {
 	self.solid = SOLID_NOT;
-	self.ammo_shells = 5;
+	self.ammo_shells = AMMO_DROP_SHELLS;
 	DropBackpack();
 	ai_back(4);
 };

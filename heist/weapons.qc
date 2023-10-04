@@ -32,6 +32,7 @@ void() W_Precache =
 	precache_sound("weapons/rocket1i.wav"); // spike gun
 	precache_sound("weapons/sgun1.wav");
 	precache_sound("weapons/guncock.wav"); // player shotgun
+	precache_sound("weapons/rifle_fire1.wav"); // player rifle
 	precache_sound("weapons/ric1.wav"); // ricochet (used in c code)
 	precache_sound("weapons/ric2.wav"); // ricochet (used in c code)
 	precache_sound("weapons/ric3.wav"); // ricochet (used in c code)
@@ -68,7 +69,7 @@ void() W_FireAxe =
 	{
 		trace_ent.axhitme = 1;
 		SpawnBlood(org, '0 0 0', 20);
-		T_Damage(trace_ent, self, self, 20);
+		T_Damage(trace_ent, self, self, DMG_AXE_BASE);
 	}
 	else
 	{ // hit wall
@@ -278,17 +279,28 @@ void(float shotcount, vector dir, vector spread) FireBullets =
 W_FireShotgun
 ================
 */
+void(vector org, vector dir, float vel, float dmg) launch_spike_bullet;
 void() W_FireShotgun =
 {
 	vector dir;
+	vector src;
 
-	sound(self, CHAN_WEAPON, "weapons/guncock.wav", 1, ATTN_NORM);
+	//sound(self, CHAN_WEAPON, "weapons/guncock.wav", 1, ATTN_NORM);
+	sound(self, CHAN_WEAPON, "weapons/rifle_fire1.wav", 1, ATTN_NORM);
 
-	self.punchangle_x = -2;
+	self.punchangle_x = -0.5;
 
-	self.currentammo = self.ammo_shells = self.ammo_shells - 1;
+	self.currentammo = self.ammo_shells = self.ammo_shells - AMMO_USE_RIFLE;
 	dir = aim(self, 100000);
-	FireBullets(6, dir, '0.04 0.04 0');
+
+	makevectors(self.v_angle);
+
+	src = self.origin + v_forward*10;
+	src_z = self.absmin_z + self.size_z * 0.7;
+
+	launch_spike_bullet(src, dir, 1400, DMG_CL_RIFLE);
+
+	//FireBullets(6, dir, '0.04 0.04 0');
 };
 
 
@@ -311,9 +323,10 @@ void() W_FireSuperShotgun =
 
 	self.punchangle_x = -4;
 
-	self.currentammo = self.ammo_shells = self.ammo_shells - 2;
+	//self.currentammo = self.ammo_shells = self.ammo_shells - 2;
+	self.currentammo = self.ammo_shells = self.ammo_shells - 4;	//shell ammo doubled to account for rifle.
 	dir = aim(self, 100000);
-	FireBullets(14, dir, '0.14 0.08 0');
+	FireBullets(DMG_CL_SHOTG, dir, '0.14 0.08 0');
 };
 
 
@@ -395,7 +408,8 @@ void() W_FireRocket =
 
 	sound(self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
 
-	self.punchangle_x = -2;
+	self.punchangle_x = -4; // -2
+	self.punchangle_y = -1 + crandom() * 4;
 
 	missile = spawn();
 	missile.owner = self;
@@ -567,7 +581,8 @@ void() W_FireGrenade =
 
 	sound(self, CHAN_WEAPON, "weapons/grenade.wav", 1, ATTN_NORM);
 
-	self.punchangle_x = -2;
+	self.punchangle_x = -1;
+	self.punchangle_y = crandom() * 3;
 
 	missile = spawn();
 	missile.owner = self;
@@ -641,7 +656,7 @@ void(vector org, vector dir) launch_spike =
 /*
 	Heist Mod
 */
-void(vector org, vector dir) launch_spike_bullet =
+void(vector org, vector dir, float vel, float dmg) launch_spike_bullet =
 {
 	newmis = spawn();
 	newmis.owner = self;
@@ -658,8 +673,8 @@ void(vector org, vector dir) launch_spike_bullet =
 	setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
 	setorigin(newmis, org);
 
-	newmis.velocity = dir * 800;
-	newmis.weapon_dmg = 5;
+	newmis.velocity = dir * vel;
+	newmis.weapon_dmg = dmg;
 };
 //===============================================
 
@@ -668,15 +683,16 @@ void() W_FireSuperSpikes =
 	vector dir;
 
 	sound(self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM);
-	self.attack_finished = time + 0.2;
-	self.currentammo = self.ammo_nails = self.ammo_nails - 2;
+	self.attack_finished = time + ROF_HMG;
+	self.currentammo = self.ammo_nails = self.ammo_nails - AMMO_USE_SUPERNL;
 	dir = aim(self, 1000);
 	launch_spike(self.origin + '0 0 16', dir);
 	newmis.touch = superspike_touch;
-	newmis.weapon_dmg = 13;
+	newmis.weapon_dmg = DMG_CL_HMG;
 	setmodel(newmis, "progs/s_spike.mdl");
 	setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
 	self.punchangle_x = -2;
+	self.punchangle_y = crandom() * 1;
 };
 
 void(float ox) W_FireSpikes =
@@ -685,13 +701,13 @@ void(float ox) W_FireSpikes =
 
 	makevectors(self.v_angle);
 
-	if (self.ammo_nails >= 2 && self.weapon == IT_SUPER_NAILGUN)
+	if (self.ammo_nails >= AMMO_USE_SUPERNL && self.weapon == IT_SUPER_NAILGUN)
 	{
 		W_FireSuperSpikes();
 		return;
 	}
 
-	if (self.ammo_nails < 1)
+	if (self.ammo_nails < AMMO_USE_NAILG)
 	{
 		self.weapon = W_BestWeapon();
 		W_SetCurrentAmmo();
@@ -699,13 +715,13 @@ void(float ox) W_FireSpikes =
 	}
 
 	sound(self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
-	self.attack_finished = time + 0.2;
-	self.currentammo = self.ammo_nails = self.ammo_nails - 1;
+	self.attack_finished = time + ROF_NAILG;
+	self.currentammo = self.ammo_nails = self.ammo_nails - AMMO_USE_NAILG;
 	dir = aim(self, 1000);
 	launch_spike(self.origin + '0 0 16' + v_right*ox, dir);
-	newmis.weapon_dmg = 9;
+	newmis.weapon_dmg = DMG_CL_NAILG;
 
-	self.punchangle_x = -2;
+	self.punchangle_x = crandom() * 0.5;
 };
 
 
@@ -949,13 +965,13 @@ void() W_Attack =
 	{
 		player_shot1();
 		W_FireShotgun();
-		self.attack_finished = time + 0.5;
+		self.attack_finished = time + ROF_RIFLE;
 	}
 	else if (self.weapon == IT_SUPER_SHOTGUN)
 	{
 		player_shot1();
 		W_FireSuperShotgun();
-		self.attack_finished = time + 0.7;
+		self.attack_finished = time + ROF_SHOTG;
 	}
 	else if (self.weapon == IT_NAILGUN)
 	{
@@ -969,13 +985,13 @@ void() W_Attack =
 	{
 		player_rocket1();
 		W_FireGrenade();
-		self.attack_finished = time + 0.6;
+		self.attack_finished = time + ROF_NADE;
 	}
 	else if (self.weapon == IT_ROCKET_LAUNCHER)
 	{
 		player_rocket1();
 		W_FireRocket();
-		self.attack_finished = time + 0.8;
+		self.attack_finished = time + ROF_RCKT;
 	}
 	else if (self.weapon == IT_LIGHTNING)
 	{
@@ -1005,43 +1021,43 @@ void() W_ChangeWeapon =
 	else if (self.impulse == 2)
 	{
 		fl = IT_SHOTGUN;
-		if (self.ammo_shells < 1)
+		if (self.ammo_shells < AMMO_USE_RIFLE)
 			am = 1;
 	}
 	else if (self.impulse == 3)
 	{
 		fl = IT_SUPER_SHOTGUN;
-		if (self.ammo_shells < 2)
+		if (self.ammo_shells < AMMO_USE_SHOTG)	//shell ammo doubled
 			am = 1;
 	}
 	else if (self.impulse == 4)
 	{
 		fl = IT_NAILGUN;
-		if (self.ammo_nails < 1)
+		if (self.ammo_nails < AMMO_USE_NAILG)
 			am = 1;
 	}
 	else if (self.impulse == 5)
 	{
 		fl = IT_SUPER_NAILGUN;
-		if (self.ammo_nails < 2)
+		if (self.ammo_nails < AMMO_USE_SUPERNL)
 			am = 1;
 	}
 	else if (self.impulse == 6)
 	{
 		fl = IT_GRENADE_LAUNCHER;
-		if (self.ammo_rockets < 1)
+		if (self.ammo_rockets < AMMO_USE_NADE)
 			am = 1;
 	}
 	else if (self.impulse == 7)
 	{
 		fl = IT_ROCKET_LAUNCHER;
-		if (self.ammo_rockets < 1)
+		if (self.ammo_rockets < AMMO_USE_RCKT)
 			am = 1;
 	}
 	else if (self.impulse == 8)
 	{
 		fl = IT_LIGHTNING;
-		if (self.ammo_cells < 1)
+		if (self.ammo_cells < AMMO_USE_LIGHT)
 			am = 1;
 	}
 
@@ -1076,9 +1092,9 @@ void() CheatCommand =
 	if (deathmatch || coop)
 		return;
 
-	self.ammo_rockets = 100;
-	self.ammo_nails = 200;
-	self.ammo_shells = 100;
+	self.ammo_rockets = AMMO_MAX_NADES;
+	self.ammo_nails = AMMO_MAX_NAILS;
+	self.ammo_shells = AMMO_MAX_SHELLS;	//rifle mod
 	self.items = self.items |
 		IT_AXE |
 		IT_SHOTGUN |
@@ -1089,7 +1105,7 @@ void() CheatCommand =
 		IT_ROCKET_LAUNCHER |
 		IT_KEY1 | IT_KEY2;
 
-	self.ammo_cells = 200;
+	self.ammo_cells = AMMO_MAX_CELLS;
 	self.items = self.items | IT_LIGHTNING;
 
 	self.weapon = IT_ROCKET_LAUNCHER;
@@ -1122,43 +1138,43 @@ void() CycleWeaponCommand =
 		else if (self.weapon == IT_AXE)
 		{
 			self.weapon = IT_SHOTGUN;
-			if (self.ammo_shells < 1)
+			if (self.ammo_shells < AMMO_USE_RIFLE)
 				am = 1;
 		}
 		else if (self.weapon == IT_SHOTGUN)
 		{
 			self.weapon = IT_SUPER_SHOTGUN;
-			if (self.ammo_shells < 2)
+			if (self.ammo_shells < AMMO_USE_SHOTG)
 				am = 1;
 		}
 		else if (self.weapon == IT_SUPER_SHOTGUN)
 		{
 			self.weapon = IT_NAILGUN;
-			if (self.ammo_nails < 1)
+			if (self.ammo_nails < AMMO_USE_NAILG)
 				am = 1;
 		}
 		else if (self.weapon == IT_NAILGUN)
 		{
 			self.weapon = IT_SUPER_NAILGUN;
-			if (self.ammo_nails < 2)
+			if (self.ammo_nails < AMMO_USE_SUPERNL)
 				am = 1;
 		}
 		else if (self.weapon == IT_SUPER_NAILGUN)
 		{
 			self.weapon = IT_GRENADE_LAUNCHER;
-			if (self.ammo_rockets < 1)
+			if (self.ammo_rockets < AMMO_USE_NADE)
 				am = 1;
 		}
 		else if (self.weapon == IT_GRENADE_LAUNCHER)
 		{
 			self.weapon = IT_ROCKET_LAUNCHER;
-			if (self.ammo_rockets < 1)
+			if (self.ammo_rockets < AMMO_USE_RCKT)
 				am = 1;
 		}
 		else if (self.weapon == IT_ROCKET_LAUNCHER)
 		{
 			self.weapon = IT_LIGHTNING;
-			if (self.ammo_cells < 1)
+			if (self.ammo_cells < AMMO_USE_LIGHT)
 				am = 1;
 		}
 
@@ -1188,43 +1204,43 @@ void() CycleWeaponBack =
 		else if (self.weapon == IT_SUPER_SHOTGUN)
 		{
 			self.weapon = IT_SHOTGUN;
-			if (self.ammo_shells < 1)
+			if (self.ammo_shells < AMMO_USE_RIFLE)
 				am = 1;
 		}
 		else if (self.weapon == IT_NAILGUN)
 		{
 			self.weapon = IT_SUPER_SHOTGUN;
-			if (self.ammo_shells < 2)
+			if (self.ammo_shells < AMMO_USE_SHOTG)
 				am = 1;
 		}
 		else if (self.weapon == IT_SUPER_NAILGUN)
 		{
 			self.weapon = IT_NAILGUN;
-			if (self.ammo_nails < 1)
+			if (self.ammo_nails < AMMO_USE_NAILG)
 				am = 1;
 		}
 		else if (self.weapon == IT_GRENADE_LAUNCHER)
 		{
 			self.weapon = IT_SUPER_NAILGUN;
-			if (self.ammo_nails < 2)
+			if (self.ammo_nails < AMMO_USE_SUPERNL)
 				am = 1;
 		}
 		else if (self.weapon == IT_ROCKET_LAUNCHER)
 		{
 			self.weapon = IT_GRENADE_LAUNCHER;
-			if (self.ammo_rockets < 1)
+			if (self.ammo_rockets < AMMO_USE_NADE)
 				am = 1;
 		}
 		else if (self.weapon == IT_LIGHTNING)
 		{
 			self.weapon = IT_ROCKET_LAUNCHER;
-			if (self.ammo_rockets < 1)
+			if (self.ammo_rockets < AMMO_USE_RCKT)
 				am = 1;
 		}
 		else if (self.weapon == IT_AXE)
 		{
 			self.weapon = IT_LIGHTNING;
-			if (self.ammo_cells < 1)
+			if (self.ammo_cells < AMMO_USE_LIGHT)
 				am = 1;
 		}
 

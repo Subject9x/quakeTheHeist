@@ -355,14 +355,14 @@ WEAPONS
 
 void() bound_other_ammo =
 {
-	if (other.ammo_shells > 100)
-		other.ammo_shells = 100;
-	if (other.ammo_nails > 200)
-		other.ammo_nails = 200;
-	if (other.ammo_rockets > 100)
-		other.ammo_rockets = 100;
-	if (other.ammo_cells > 100)
-		other.ammo_cells = 100;
+	if (other.ammo_shells > AMMO_MAX_SHELLS)
+		other.ammo_shells = AMMO_MAX_SHELLS;
+	if (other.ammo_nails > AMMO_MAX_NAILS)
+		other.ammo_nails = AMMO_MAX_NAILS;
+	if (other.ammo_rockets > AMMO_MAX_NADES)
+		other.ammo_rockets = AMMO_MAX_NADES;
+	if (other.ammo_cells > AMMO_MAX_CELLS)
+		other.ammo_cells = AMMO_MAX_CELLS;
 };
 
 
@@ -452,7 +452,7 @@ void() weapon_touch =
 			return;
 		hadammo = other.ammo_rockets;
 		new = IT_SUPER_SHOTGUN;
-		other.ammo_shells = other.ammo_shells + 5;
+		other.ammo_shells = other.ammo_shells + AMMO_SHELLS_PICKUP;
 	}
 	else if (self.classname == "weapon_rocketlauncher")
 	{
@@ -637,7 +637,7 @@ void() ammo_touch =
 // shotgun
 	if (self.weapon == 1)
 	{
-		if (other.ammo_shells >= 100)
+		if (other.ammo_shells >= AMMO_MAX_SHELLS)
 			return;
 		other.ammo_shells = other.ammo_shells + self.aflag;
 	}
@@ -645,7 +645,7 @@ void() ammo_touch =
 // spikes
 	if (self.weapon == 2)
 	{
-		if (other.ammo_nails >= 200)
+		if (other.ammo_nails >= AMMO_MAX_NAILS)
 			return;
 		other.ammo_nails = other.ammo_nails + self.aflag;
 	}
@@ -653,7 +653,7 @@ void() ammo_touch =
 //	rockets
 	if (self.weapon == 3)
 	{
-		if (other.ammo_rockets >= 100)
+		if (other.ammo_rockets >= AMMO_MAX_NADES)
 			return;
 		other.ammo_rockets = other.ammo_rockets + self.aflag;
 	}
@@ -661,7 +661,7 @@ void() ammo_touch =
 //	cells
 	if (self.weapon == 4)
 	{
-		if (other.ammo_cells >= 200)
+		if (other.ammo_cells >= AMMO_MAX_CELLS)
 			return;
 		other.ammo_cells = other.ammo_cells + self.aflag;
 	}

@@ -205,7 +205,13 @@ void() player_nail1 = [ $nailatt1, player_nail2  ]
 		self.weaponframe = 1;
 	SuperDamageSound();
 	W_FireSpikes(4);
-	self.attack_finished = time + 0.2;
+	if(self.weapon == IT_SUPER_NAILGUN){
+		self.attack_finished = time + ROF_HMG;
+		self.nextthink = time + ROF_HMG;
+		return;
+	}
+	self.attack_finished = time + ROF_NAILG;
+	self.nextthink = time + ROF_NAILG;
 };
 void() player_nail2 = [ $nailatt2, player_nail1  ]
 {
@@ -221,7 +227,13 @@ void() player_nail2 = [ $nailatt2, player_nail1  ]
 		self.weaponframe = 1;
 	SuperDamageSound();
 	W_FireSpikes(-4);
-	self.attack_finished = time + 0.2;
+	if(self.weapon == IT_SUPER_NAILGUN){
+		self.attack_finished = time + ROF_HMG;
+		self.nextthink = time + ROF_HMG;
+		return;
+	}
+	self.attack_finished = time + ROF_NAILG;
+	self.nextthink = time + ROF_NAILG;
 };
 
 //============================================================================

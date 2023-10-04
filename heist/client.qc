@@ -17,6 +17,11 @@
     See file, 'COPYING', for details.
 */
 
+entity SV_CLIENT1;
+entity SV_CLIENT2;
+entity SV_CLIENT3;
+entity SV_CLIENT4;
+
 // prototypes
 void() W_WeaponFrame;
 void() W_SetCurrentAmmo;
@@ -63,8 +68,8 @@ void() SetChangeParms =
 	parm1 = self.items;
 	parm2 = self.health;
 	parm3 = self.armorvalue;
-	if (self.ammo_shells < 25)
-		parm4 = 25;
+	if (self.ammo_shells < 50)
+		parm4 = 50;
 	else
 		parm4 = self.ammo_shells;
 	parm5 = self.ammo_nails;
@@ -79,7 +84,7 @@ void() SetNewParms =
 	parm1 = IT_SHOTGUN | IT_AXE;
 	parm2 = 100;
 	parm3 = 0;
-	parm4 = 25;
+	parm4 = 50;
 	parm5 = 0;
 	parm6 = 0;
 	parm7 = 0;

@@ -47,6 +47,37 @@
 #define CL_STATE_CONN 1
 #define CL_STATE_RESPN 2
 
+#define AMMO_SHELLS_PICKUP 16
+
+#define AMMO_MAX_SHELLS 100
+#define AMMO_MAX_NAILS 200
+#define AMMO_MAX_NADES 100
+#define AMMO_MAX_CELLS 200
+
+#define AMMO_USE_RIFLE 1
+#define AMMO_USE_SHOTG 4
+#define AMMO_USE_NAILG 1
+#define AMMO_USE_SUPERNL 2
+#define AMMO_USE_NADE 1
+#define AMMO_USE_RCKT 2
+#define AMMO_USE_LIGHT 1
+
+#define DMG_AXE_BASE 30	//20
+#define DMG_CL_RIFLE 24 // 6
+#define DMG_CL_SHOTG 20	//14
+#define DMG_CL_NAILG 3	//9
+#define DMG_CL_HMG 20 //13
+#define DMG_CL_NADE 40
+#define DMG_CL_RCKT 40
+#define DMG_CL_LIGHT 6
+
+#define ROF_RIFLE 0.67
+#define ROF_SHOTG 1.0
+#define ROF_NAILG 0.09
+#define ROF_HMG 0.3
+#define ROF_NADE 2 //0.6
+#define ROF_RCKT 4	//0.8
+
 float MUSIC_ACTION;
 float MUSIC_MOOD;
 float MUSIC_WAIT;
